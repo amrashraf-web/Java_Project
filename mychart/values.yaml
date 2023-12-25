@@ -1,0 +1,14 @@
+image:
+  repository: amrashraf.com:8082/my-java-app:latest
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+secret:
+  name: mysecret
+  usernameKey: admin
+  passwordKey: admin
+
+
+
+# $ kubectl create secret docker-registry mysecret   --docker-server=amrashraf.com:8082   --docker-username=admin   --docker-password=admin   --docker-email=amr.ashraf@qeema.net
