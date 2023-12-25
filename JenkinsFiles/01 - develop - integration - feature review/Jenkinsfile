@@ -20,6 +20,7 @@ pipeline {
                     ])
                 }
             }
+        }
         stage('Build and Unit Tests') {
             steps {
                 script {
@@ -28,11 +29,12 @@ pipeline {
                 }
             }
         }
+    
     }
-
     post {
         success {
             archiveArtifacts 'target/my-java-app-0.0.4-SNAPSHOT.jar'
         }
     }
+
 }
