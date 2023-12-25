@@ -1,11 +1,11 @@
 pipeline {
     agent any
     environment {
-        SONAR_URL = 'http://amrashraf.com:9000/sonarqube'
-        SONAR_PROJECT_KEY = 'my-java-app'
-        SONAR_PROJECT_NAME = 'my-java-app'
+        sonar_url = 'http://amrashraf.com:9000/sonarqube'
+        sonar_project_key = 'my-java-app'
+        sonar_project_name = 'my-java-app'
         version = "v${BUILD_NUMBER}"
-        MAVEN_EXTRA_ARGUMENTS = "-s .m2/settings.xml"
+        maven_extra = "-s .m2/settings.xml"
     }
     stages {
         stage('Checkout') {
@@ -28,7 +28,7 @@ pipeline {
                 script {
                     sh "chmod +x automations/bin/*.sh"
 
-                    sh "automations/bin/compile.sh \"maven_extra_arguments=${MAVEN_EXTRA_ARGUMENTS}\" \"version=${version}\" \"sonar_url=$SONAR_URL\" \"sonar_project_key=${SONAR_PROJECT_KEY}\" \"sonar_project_name=${SONAR_PROJECT_NAME}\""
+                    sh "automations/bin/compile.sh \"maven_extra_arguments=${maven_extra}\" \"version=${version}\" \"sonar_url=${sonar_url}\" \"sonar_project_key=${sonar_project_key}\" \"sonar_project_name=${sonar_project_name}\""
                     
                     sh "mkdir -p publish-artifacts"
                     
