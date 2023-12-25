@@ -16,7 +16,7 @@
   <pluginRepositories>
     <pluginRepository>
       <id>nexus</id>
-      <url>http://amrashraf.com:8081/repository/maven-public/</url>
+      <url>http://amrashraf.com:8082/repository/maven-public/</url>
     </pluginRepository>
   </pluginRepositories>
   <dependencies>
