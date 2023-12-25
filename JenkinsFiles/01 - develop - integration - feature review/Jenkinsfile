@@ -28,7 +28,7 @@ pipeline {
                 script {
                     sh "chmod +x automations/bin/*.sh"
 
-                    sh "automations/bin/compile.sh \"maven_extra_arguments=${MAVEN_EXTRA_ARGUMENTS}\" \"version=${version}\" \"sonar_url=${SONAR_URL}\" \"sonar_project_key=${SONAR_PROJECT_KEY}\" \"sonar_project_name=${SONAR_PROJECT_NAME}\""
+                    sh "automations/bin/compile.sh \"maven_extra_arguments=${MAVEN_EXTRA_ARGUMENTS}\" \"version=${version}\" \"sonar_url=$SONAR_URL\" \"sonar_project_key=${SONAR_PROJECT_KEY}\" \"sonar_project_name=${SONAR_PROJECT_NAME}\""
                     
                     sh "mkdir -p publish-artifacts"
                     
