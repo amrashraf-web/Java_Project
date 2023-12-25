@@ -1,6 +1,6 @@
 #!/bin/bash
 
-baseline_cmd="mvn clean package"
+baseline_cmd="mvn clean install"
 
 if ! test -z "$sonar_url" 
 then
