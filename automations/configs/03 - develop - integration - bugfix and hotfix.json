@@ -1,0 +1,13 @@
+{	
+    mergeConfigs: [{
+    	name: "Integrate latest master hotfixes into develop branch",
+        sourceBranch: "master",
+        targetBranch: "develop",
+        intermedialBranch: "develop-feature/backwards-integration-hotfixes"
+    },{
+    	name: "Integrate latest release bugfixes into develop branch",
+        sourceBranch: "release",
+        targetBranch: "develop",
+        intermedialBranch: "develop-feature/backwards-integration-bugfixes"
+    }]
+}

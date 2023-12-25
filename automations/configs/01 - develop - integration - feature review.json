@@ -1,0 +1,16 @@
+{	
+	applicationName: "my-java-app",
+
+	buildConfigs: [{
+		key: "my-java-app",
+		name: "Build and Unit Tests",
+		agent: {
+			dockerfile: {
+				filename: "maven-3.6.3-openjdk-11.Dockerfile"
+			}
+		},
+        sonarEnabled: true,
+		buildCommand: "chmod +x automations/bin/*.sh && automations/bin/compile.sh \"maven_extra_arguments=-s .m2/settings.xml\" \"version=$version\" \"sonar_url=$SONAR_URL\" \"sonar_project_key=$SONAR_PROJECT_KEY\" \"sonar_project_name=$SONAR_PROJECT_NAME\" && mkdir -p publish-artifacts && cp target/my-java-app-0.0.4-SNAPSHOT.jar publish-artifacts/my-java-app-$version.jar"
+       	
+		}]
+}

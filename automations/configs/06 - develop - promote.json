@@ -1,0 +1,12 @@
+{
+	notifications: {
+		success: {
+			mailingList: "ifergany.c@stc.com.sa",
+			subject: "be-eureka-discovery-server - Promote Develop to Release - Continuous Integration"
+		},
+		maintenance: {
+			mailingList: "ifergany.c@stc.com.sa",
+			subject: "be-eureka-discovery-server - Promote Develop to Release - Continuous Integration - MAINTENANCE"
+		}
+	}
+}

@@ -1,0 +1,75 @@
+{
+	applicationName: "be-eureka-discovery-server",
+	
+	environments: {
+		"dev": {
+			kube_config_id: "kube-config-dev",
+			kube_context:  "partnerhub-oe-dev/api-ocp-dev-stc-com-sa:6443/oedeployer@stc.com.sa", // add context of application
+			namespace: "partnerhub-oe-dev" // add namespace of context
+		},
+		"release": {
+			kube_config_id: "kube-config-preprod",
+			kube_context:  "partnerhub-oe-preprod/api-ocp-dev-stc-com-sa:6443/oedeployer@stc.com.sa",
+			namespace: "partnerhub-oe-preprod"
+		}
+	},
+	
+	deployConfigs: {
+		"Helm upgrade": {
+			actions: [{
+				name: "Download be-eureka-discovery-server helm package",
+				type: "download-maven-artifact",
+				groupId: "sa.com.stc.phub.be-eureka-discovery-server",
+				artifactId: "be-eureka-discovery-server-helm",
+				packaging: "tar.gz",
+				targetLocation: "be-eureka-discovery-server-helm.tar.gz"
+			}, {
+				name: "Setup kube config",
+				type: "setup-managed-files",
+				files: [{
+					fileId: "$kube_config_id",
+				    targetLocation: ".kube/config"
+				}]
+			},  {
+				name: "Run Helm upgrade command",
+				type: "run-shell-command",
+				command: "chmod +x automations/bin/*.sh && automations/bin/deploy.sh \"component=helm\" \"version=$version\" \"kube_config_path=.kube/config\" \"kube_context=$kube_context\" \"helm_chart_path=./be-eureka-discovery-server-helm.tar.gz\" \"helm_values_path=values_$environment.yml\" \"helm_release_name=be-eureka-discovery-server-$environment\""
+			}]
+		},
+
+		"Uninstall": {
+			actions: [{
+				name: "Setup kube config",
+				type: "setup-managed-files",
+				files: [{
+					fileId: "$kube_config_id",
+					targetLocation: ".kube/config"
+				}]
+			}, {
+				name: "Run helm uninstall command",
+				type: "run-shell-command",
+				command: "export KUBECONFIG=.kube/config && helm uninstall --debug --kube-context \"$kube_context\" be-eureka-discovery-server-$environment"
+			}]
+		}
+	},
+
+	logPatterns: [
+		 "*.log"
+	],
+	
+	notifications: {
+		email: {
+			filePath: "email.html",
+			success: {
+				mailingList: "ifergany.c@stc.com.sa",
+				subject: "be-eureka-discovery-server - Develop - Continuous Deployment",
+				templatePath: "automations/pipelines/ci-cd/03 - deploy/01 - deploy/email-templates/success.html"
+			},
+			maintenance: {
+				mailingList: "ifergany.c@stc.com.sa",
+				subject: "be-eureka-discovery-server - Develop - Continuous Deployment - MAINTENANCE",
+				templatePath: "automations/pipelines/ci-cd/03 - deploy/01 - deploy/email-templates/maintenance.html"
+			}
+		}
+	}
+}
