@@ -1,9 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            file 'maven-3.6.3-openjdk-11.Dockerfile'
-        }
-    }
+    agent any
 
     stages {
         stage('Checkout') {
@@ -21,7 +17,14 @@ pipeline {
                 }
             }
         }
+
         stage('Build and Unit Tests') {
+            agent {
+                docker {
+                    image 'maven:3.6.3-openjdk-11'
+                    args '-v $HOME/.m2:/root/.m2'
+                }
+            }
             steps {
                 script {
                     sh 'chmod +x automations/bin/*.sh'
@@ -29,12 +32,11 @@ pipeline {
                 }
             }
         }
-    
     }
+
     post {
         success {
             archiveArtifacts 'target/my-java-app-0.0.4-SNAPSHOT.jar'
         }
     }
-
 }
