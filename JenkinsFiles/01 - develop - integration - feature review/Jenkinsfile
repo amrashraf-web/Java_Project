@@ -5,6 +5,7 @@ pipeline {
         SONAR_PROJECT_KEY = 'my-java-app'
         SONAR_PROJECT_NAME = 'my-java-app'
         version = "v${BUILD_NUMBER}"
+        MAVEN_EXTRA_ARGUMENTS = "-s .m2/settings.xml"
     }
     stages {
         stage('Checkout') {
@@ -25,10 +26,17 @@ pipeline {
         stage('Build and Unit Tests') {
             steps {
                 script {
-                    sh "chmod +x automations/bin/*.sh && automations/bin/compile.sh \"maven_extra_arguments=-s .m2/settings.xml\" \"version=$version\" \"sonar_url=$SONAR_URL\" \"sonar_project_key=$SONAR_PROJECT_KEY\" \"sonar_project_name=$SONAR_PROJECT_NAME\" && mkdir -p publish-artifacts && cp target/hello-world-web.war publish-artifacts/my-java-app-$version.war"
+                    sh "chmod +x automations/bin/*.sh"
+
+                    sh "automations/bin/compile.sh \"maven_extra_arguments=${MAVEN_EXTRA_ARGUMENTS}\" \"version=${version}\" \"sonar_url=${SONAR_URL}\" \"sonar_project_key=${SONAR_PROJECT_KEY}\" \"sonar_project_name=${SONAR_PROJECT_NAME}\""
+                    
+                    sh "mkdir -p publish-artifacts"
+                    
+                    sh "cp target/hello-world-web.war publish-artifacts/my-java-app-${version}.war"
                 }
             }
         }
+    }
     
     }
     post {
