@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        SONAR_URL = 'amrashraf.com:9000/sonarqube'
+        SONAR_URL = 'http://amrashraf.com:9000/sonarqube'
         SONAR_PROJECT_KEY = 'my-java-app'
         SONAR_PROJECT_NAME = 'my-java-app'
         version = "v${BUILD_NUMBER}"
