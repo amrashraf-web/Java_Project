@@ -28,7 +28,7 @@ pipeline {
     }
     post {
         success {
-            archiveArtifacts 'target/my-java-app-0.0.4-SNAPSHOT.jar'
+            archiveArtifacts 'target/hello-world-web.war'
         }
     }
 
