@@ -1,0 +1,1 @@
+FROM amrashraf.com:8082/maven:3.6.3-openjdk-11
