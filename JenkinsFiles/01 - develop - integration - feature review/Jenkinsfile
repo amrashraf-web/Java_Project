@@ -1,0 +1,38 @@
+pipeline {
+    agent {
+        docker {
+            file 'maven-3.6.3-openjdk-11.Dockerfile'
+        }
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    def gitCredentialsId = 'github_key'
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: 'develop']],
+                        userRemoteConfigs: [[
+                            url: 'https://github.com/amrashraf-web/Java_Project.git',
+                            credentialsId: gitCredentialsId
+                        ]]
+                    ])
+                }
+            }
+        stage('Build and Unit Tests') {
+            steps {
+                script {
+                    sh 'chmod +x automations/bin/*.sh'
+                    sh 'automations/bin/compile.sh "maven_extra_arguments=-s .m2/settings.xml" "version=$version" "sonar_url=$SONAR_URL" "sonar_project_key=$SONAR_PROJECT_KEY" "sonar_project_name=$SONAR_PROJECT_NAME"'
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            archiveArtifacts 'target/my-java-app-0.0.4-SNAPSHOT.jar'
+        }
+    }
+}
