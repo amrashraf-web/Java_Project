@@ -26,6 +26,8 @@ pipeline {
         stage('Build and Unit Tests') {
             steps {
                 script {
+                    sh "git clean -fdx"
+                    sh "git tag -l | xargs git tag -d && git fetch -t origin-rw"
                     sh "chmod +x automations/bin/*.sh"
 
                     sh "automations/bin/compile.sh \"maven_extra_arguments=${maven_extra}\" \"version=${version}\" \"sonar_url=${sonar_url}\" \"sonar_project_key=${sonar_project_key}\" \"sonar_project_name=${sonar_project_name}\""
