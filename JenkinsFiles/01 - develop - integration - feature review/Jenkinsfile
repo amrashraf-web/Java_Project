@@ -23,10 +23,26 @@ pipeline {
                 }
             }
         }
-        stage('Build and Unit Tests') {
+        stage('Reset WorkSpace') {
             steps {
                 script {
                     sh "git clean -fdx"
+                }
+            }
+        }
+        stage('Generate Version') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'github_key', passwordVariable: 'GIT_TOKEN', usernameVariable: 'GIT_USERNAME')]) {
+                        sh "git remote add origin-rw https://${GIT_USERNAME}:${GIT_TOKEN}@github.com/${GIT_USERNAME}/Java_Project.git"
+                        sh "git tag -l | xargs git tag -d && git fetch -t origin-rw"
+                    }
+                }
+            }
+        }
+        stage('Build and Unit Tests') {
+            steps {
+                script {
                     sh "git tag -l | xargs git tag -d && git fetch -t origin-rw"
                     sh "chmod +x automations/bin/*.sh"
 
