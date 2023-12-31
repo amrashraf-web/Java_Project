@@ -56,7 +56,6 @@ pipeline {
                 }
             }
         }
-fasfag
         stage('Build and Test') {
             steps {
                 script {
