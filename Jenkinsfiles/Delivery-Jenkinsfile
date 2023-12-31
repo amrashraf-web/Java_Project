@@ -39,12 +39,11 @@ pipeline {
                     betaVersion = "${majorVersion}.${minorVersion}.${buildNumber % (maxBuildNumber + 1)}-beta"
                     sh """
                        echo \"${betaVersion}\"
-                       chmod +x ${WORKSPACE}/automations/bin/*.sh &&
-                       ${WORKSPACE}/automations/bin/compile.sh "maven_extra_arguments=-s .m2/settings.xml" "version=${betaVersion}" "sonar_url=$SONAR_URL" "sonar_project_key=$SONAR_PROJECT_KEY" "sonar_project_name=$SONAR_PROJECT_NAME" &&
-                       mkdir -p ${WORKSPACE}/publish-artifacts &&
-                       cp target/hello-world-web.war ${WORKSPACE}/publish-artifacts/hello-world-web-${betaVersion}.war
+                       chmod +x \"${WORKSPACE}/automations/bin\"/*.sh &&
+                       \"${WORKSPACE}/automations/bin/compile.sh\" "maven_extra_arguments=-s .m2/settings.xml" "version=${betaVersion}" "sonar_url=$SONAR_URL" "sonar_project_key=$SONAR_PROJECT_KEY" "sonar_project_name=$SONAR_PROJECT_NAME" &&
+                       mkdir -p \"${WORKSPACE}/publish-artifacts\" &&
+                       cp target/hello-world-web.war \"${WORKSPACE}/publish-artifacts/hello-world-web-${betaVersion}.war\"
                     """
-
                 }
             }
         }
