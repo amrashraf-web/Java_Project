@@ -34,7 +34,7 @@ pipeline {
                     def buildNumber = BUILD_NUMBER.toInteger()
                     def maxBuildNumber = MAX_BUILD_NUMBER.toInteger()
                     def betaVersion = "${majorVersion}.${minorVersion}.${buildNumber % (maxBuildNumber + 1)}-beta"
-        
+                    sh '${betaVersion}'
                     sh 'chmod +x automations/bin/*.sh && automations/bin/compile.sh "maven_extra_arguments=-s .m2/settings.xml" "version=${betaVersion}" "sonar_url=$SONAR_URL" "sonar_project_key=$SONAR_PROJECT_KEY" "sonar_project_name=$SONAR_PROJECT_NAME" && mkdir -p publish-artifacts && cp target/hello-world-web.war publish-artifacts/hello-world-web-${betaVersion}.war'
                 }
             }
