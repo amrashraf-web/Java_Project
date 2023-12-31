@@ -34,8 +34,8 @@ pipeline {
 
         stage('Initialize') {
             steps {
+                // Load beta version from environment variable if it exists
                 script {
-                    // Load beta version from environment variable if it exists
                     betaVersion = env[BETA_VERSION_ENV_VAR]
                     if (!betaVersion) {
                         def majorVersion = Integer.parseInt(VERSION_PREFIX.tokenize('.')[0])
