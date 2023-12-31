@@ -95,7 +95,7 @@ pipeline {
 }
 
 def fileExists(filePath) {
-    return file(new File(filePath.toString())).exists()
+    return file(filePath).isFile()
 }
 
 
