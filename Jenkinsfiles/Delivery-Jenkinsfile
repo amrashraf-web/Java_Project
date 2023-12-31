@@ -8,6 +8,11 @@ pipeline {
         MAX_BUILD_NUMBER = 9
     }
     stages {
+        stage('Reset Workspace') {
+            steps {
+                cleanWs()
+            }
+        }
         stage('Checkout') {
             steps {
                 script {
@@ -21,11 +26,6 @@ pipeline {
                         ]]
                     ])
                 }
-            }
-        }
-        stage('Reset Workspace') {
-            steps {
-                cleanWs()
             }
         }
         stage('Build and Test') {
