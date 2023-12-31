@@ -1,17 +1,21 @@
 pipeline {
     agent any
+
     environment {
         sonar_url = 'http://amrashraf.com:9000/sonarqube'
         sonar_project_key = 'my-java-app'
         sonar_project_name = 'my-java-app'
         VERSION_PREFIX = '0.1.'
+        BETA_VERSION_FILE = "${WORKSPACE}/beta_version.txt"
     }
+
     stages {
         stage('Reset Workspace') {
             steps {
                 cleanWs()
             }
         }
+
         stage('Checkout') {
             steps {
                 script {
@@ -27,6 +31,31 @@ pipeline {
                 }
             }
         }
+
+        stage('Initialize') {
+            steps {
+                script {
+                    // Load beta version from file if it exists
+                    if (fileExists(BETA_VERSION_FILE)) {
+                        betaVersion = readFile(BETA_VERSION_FILE).trim()
+                        echo "Restored beta version from file: ${betaVersion}"
+                    } else {
+                        def majorVersion = Integer.parseInt(VERSION_PREFIX.tokenize('.')[0])
+                        def minorVersion = Integer.parseInt(VERSION_PREFIX.tokenize('.')[1])
+                        def buildNumber = BUILD_NUMBER.toInteger()
+                        def minorIncrement = (buildNumber / 10).toInteger()
+                        minorVersion += minorIncrement
+                        buildNumber %= 10
+                        betaVersion = "${majorVersion}.${minorVersion}.${buildNumber}-beta"
+                        echo "Initialized beta version: ${betaVersion}"
+                        // Save beta version to file
+                        writeFile(file: BETA_VERSION_FILE, text: betaVersion)
+                    }
+                    echo "Current beta version: ${betaVersion}"
+                }
+            }
+        }
+
         stage('Build and Test') {
             steps {
                 script {
@@ -49,15 +78,22 @@ pipeline {
                        mkdir -p \"${WORKSPACE}/publish-artifacts\" &&
                        cp target/hello-world-web.war \"${WORKSPACE}/publish-artifacts/hello-world-web-${betaVersion}.war\"
                     """
+                    writeFile(file: BETA_VERSION_FILE, text: betaVersion)
                 }
             }
         }
-
     }
 
     post {
         success {
             archiveArtifacts "publish-artifacts/hello-world-web-${betaVersion}.war"
         }
+        always {
+            echo "Cleaning up..."
+        }
     }
+}
+
+def fileExists(filePath) {
+    return file(filePath).exists()
 }
