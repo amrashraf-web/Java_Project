@@ -13,16 +13,6 @@ pipeline {
                 cleanWs()
             }
         }
-        stage('Reset Sonar Analysis') {
-            steps {
-                script {
-                    withSonarQubeEnv('sonarqube') {
-                        // Additional SonarQube settings
-                        sh "sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY} -Dsonar.projectName=${SONAR_PROJECT_NAME}"
-                    }
-                }
-            }
-        }
         stage('Checkout') {
             steps {
                 script {
