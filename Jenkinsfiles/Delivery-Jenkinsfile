@@ -23,11 +23,11 @@ pipeline {
                 }
             }
         }
-        stage('Reset Workspace') {
-            steps {
-                cleanWs()
-            }
-        }
+        #stage('Reset Workspace') {
+        #    steps {
+        #        cleanWs()
+        #    }
+        #}
 
         stage('Build and Test') {
             steps {
