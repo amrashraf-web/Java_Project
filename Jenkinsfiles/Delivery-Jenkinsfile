@@ -36,13 +36,13 @@ pipeline {
                     
                     // Convert BUILD_NUMBER to integer and calculate the beta version
                     def buildNumber = BUILD_NUMBER.toInteger()
-                    def maxBuildNumber = MAX_BUILD_NUMBER.toInteger()
                     
-                    // Check if BUILD_NUMBER is 9, then increment minorVersion and reset BUILD_NUMBER to 0
-                    if (buildNumber == 9) {
-                        minorVersion++
-                        buildNumber = 0
-                    }
+                    // Calculate minor version increment based on buildNumber
+                    def minorIncrement = (buildNumber / 10).toInteger()
+                    
+                    // Calculate new minor version and reset buildNumber
+                    minorVersion += minorIncrement
+                    buildNumber %= 10
                     
                     betaVersion = "${majorVersion}.${minorVersion}.${buildNumber}-beta"
                     
