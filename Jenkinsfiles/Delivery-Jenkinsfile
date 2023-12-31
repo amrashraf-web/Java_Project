@@ -45,7 +45,16 @@ pipeline {
     
     post {
         success {
-            archiveArtifacts artifacts: "publish-artifacts/hello-world-web-*.war", onlyIfSuccessful: true
+            script {
+                def lastArtifact = findFiles(glob: 'publish-artifacts/hello-world-web-*.war').sort { it.name }.last()
+    
+                if (lastArtifact) {
+                    archiveArtifacts artifacts: "${lastArtifact}", onlyIfSuccessful: true
+                } else {
+                    error "No matching artifacts found in publish-artifacts folder."
+                }
+            }
         }
     }
+
 }
