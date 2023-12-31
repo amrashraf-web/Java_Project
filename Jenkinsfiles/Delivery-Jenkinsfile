@@ -31,7 +31,7 @@ pipeline {
     
     post {
         success {
-            archiveArtifacts 'publish-artifacts/hello-world-web-$version.war'
+            archiveArtifacts 'hello-world-web-$version.war'
         }
     }
 
