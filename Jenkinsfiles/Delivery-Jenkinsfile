@@ -90,9 +90,3 @@ pipeline {
         }
     }
 }
-
-def fileExists(filePath) {
-    script {
-        return file(filePath).exists()
-    }
-}
