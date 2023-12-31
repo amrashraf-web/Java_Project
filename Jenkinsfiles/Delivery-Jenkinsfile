@@ -16,14 +16,11 @@ pipeline {
         stage('Reset Sonar Analysis') {
             steps {
                 script {
-                    // Unstash the SonarQube settings (if stashed during checkout or build)
+                    // Unstash the SonarQube settings
                     unstash 'sonar-stash'
 
                     // Reset SonarQube analysis using the sonar-scanner command
                     bat "sonar-scanner -Dsonar.projectKey=${SONAR_PROJECT_KEY} -Dsonar.projectName=${SONAR_PROJECT_NAME} -Dsonar.host.url=${SONAR_URL} -Dsonar.login=${SONAR_LOGIN} -Dsonar.password=${SONAR_PASSWORD}"
-
-                    // Stash the SonarQube settings again for future stages
-                    stash includes: 'sonar-stash/**', name: 'sonar-stash'
                 }
             }
         }
