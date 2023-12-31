@@ -95,5 +95,7 @@ pipeline {
 }
 
 def fileExists(filePath) {
-    return file(filePath).exists()
+    script {
+        return new File(filePath).exists()
+    }
 }
