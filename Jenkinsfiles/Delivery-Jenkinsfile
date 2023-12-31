@@ -6,7 +6,6 @@ pipeline {
         sonar_project_key = 'my-java-app'
         sonar_project_name = 'my-java-app'
         VERSION_PREFIX = '0.1.'
-        BETA_VERSION_ENV_VAR = 'BETA_VERSION'
     }
 
     stages {
@@ -28,31 +27,6 @@ pipeline {
                             credentialsId: gitCredentialsId
                         ]]
                     ])
-                }
-            }
-        }
-
-        stage('Initialize') {
-            steps {
-                script {
-                    // Load beta version from environment variable if it exists
-                    betaVersion = env.BETA_VERSION_ENV_VAR
-                    if (!betaVersion) {
-                        def majorVersion = Integer.parseInt(VERSION_PREFIX.tokenize('.')[0])
-                        def minorVersion = Integer.parseInt(VERSION_PREFIX.tokenize('.')[1])
-                        def buildNumber = BUILD_NUMBER.toInteger()
-                        def minorIncrement = (buildNumber / 10).toInteger()
-                        minorVersion += minorIncrement
-                        buildNumber %= 10
-                        betaVersion = "${majorVersion}.${minorVersion}.${buildNumber}-beta"
-                        echo "Initialized beta version: ${betaVersion}"
-    
-                        // Set beta version using withEnv
-                        withEnv(["${BETA_VERSION_ENV_VAR}=${betaVersion}"]) {
-                            // Your other initialization steps here
-                        }
-                    }
-                    echo "Current beta version: ${betaVersion}"
                 }
             }
         }
