@@ -18,7 +18,7 @@ pipeline {
                 script {
                     withSonarQubeEnv('sonarqube') {
                         // Additional SonarQube settings
-                        sh "sonar-scanner -Dsonar.projectKey=${SONAR_PROJECT_KEY} -Dsonar.projectName=${SONAR_PROJECT_NAME}"
+                        sh "sonar:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY} -Dsonar.projectName=${SONAR_PROJECT_NAME}"
                     }
                 }
             }
