@@ -45,7 +45,7 @@ pipeline {
     
     post {
         success {
-            archiveArtifacts artifacts: "publish-artifacts/hello-world-web-${betaVersion}.war", onlyIfSuccessful: true
+            archiveArtifacts artifacts: "publish-artifacts/hello-world-web-*.war", onlyIfSuccessful: true
         }
     }
 }
