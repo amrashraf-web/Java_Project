@@ -32,7 +32,7 @@ pipeline {
                     // Convert BUILD_NUMBER to integer and calculate the beta version
                     def buildNumber = BUILD_NUMBER.toInteger()
                     def maxBuildNumber = MAX_BUILD_NUMBER.toInteger()
-                    def betaVersion = "${majorVersion}.${minorVersion}.${buildNumber % (maxBuildNumber + 1)}-beta"
+                    betaVersion = "${majorVersion}.${minorVersion}.${buildNumber % (maxBuildNumber + 1)}-beta"
                     sh """
                         echo \"${betaVersion}\"
                         chmod +x automations/bin/*.sh &&
@@ -44,12 +44,10 @@ pipeline {
             }
         }
     }
-    
+
     post {
         success {
             archiveArtifacts "publish-artifacts/hello-world-web-${betaVersion}.war"
         }
     }
-
-
 }
