@@ -5,7 +5,6 @@ pipeline {
         sonar_project_key = 'my-java-app'
         sonar_project_name = 'my-java-app'
         VERSION_PREFIX = '0.1.'
-        MAX_BUILD_NUMBER = 9
     }
     stages {
         stage('Reset Workspace') {
@@ -33,20 +32,11 @@ pipeline {
                 script {
                     def majorVersion = Integer.parseInt(VERSION_PREFIX.tokenize('.')[0])
                     def minorVersion = Integer.parseInt(VERSION_PREFIX.tokenize('.')[1])
-                    
-                    // Convert BUILD_NUMBER to integer and calculate the beta version
                     def buildNumber = BUILD_NUMBER.toInteger()
-                    
-                    // Calculate minor version increment based on buildNumber
                     def minorIncrement = (buildNumber / 10).toInteger()
-                    
-                    // Calculate new minor version and reset buildNumber
                     minorVersion += minorIncrement
                     buildNumber %= 10
-                    
                     betaVersion = "${majorVersion}.${minorVersion}.${buildNumber}-beta"
-                    
-                    // Update the environment variables
                     env.VERSION_PREFIX = "${majorVersion}.${minorVersion}"
                     env.BUILD_NUMBER = "${buildNumber}"
         
