@@ -31,9 +31,10 @@ pipeline {
     
     post {
         success {
-            archiveArtifacts artifacts: 'publish-artifacts/hello-world-web-$version.war', onlyIfSuccessful: true
+            archiveArtifacts artifacts: "publish-artifacts/hello-world-web-${version}.war", onlyIfSuccessful: true
         }
     }
+
 
 
 }
