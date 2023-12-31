@@ -34,9 +34,9 @@ pipeline {
 
         stage('Initialize') {
             steps {
-                // Load beta version from environment variable if it exists
                 script {
-                    betaVersion = env[BETA_VERSION_ENV_VAR]
+                    // Load beta version from environment variable if it exists
+                    betaVersion = env.BETA_VERSION_ENV_VAR
                     if (!betaVersion) {
                         def majorVersion = Integer.parseInt(VERSION_PREFIX.tokenize('.')[0])
                         def minorVersion = Integer.parseInt(VERSION_PREFIX.tokenize('.')[1])
@@ -46,8 +46,11 @@ pipeline {
                         buildNumber %= 10
                         betaVersion = "${majorVersion}.${minorVersion}.${buildNumber}-beta"
                         echo "Initialized beta version: ${betaVersion}"
-                        // Save beta version to environment variable
-                        env[BETA_VERSION_ENV_VAR] = betaVersion
+    
+                        // Set beta version using withEnv
+                        withEnv(["${BETA_VERSION_ENV_VAR}=${betaVersion}"]) {
+                            // Your other initialization steps here
+                        }
                     }
                     echo "Current beta version: ${betaVersion}"
                 }
