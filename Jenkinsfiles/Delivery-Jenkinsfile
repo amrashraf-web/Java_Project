@@ -29,15 +29,16 @@ pipeline {
                 script {
                     def majorVersion = Integer.parseInt(VERSION_PREFIX.tokenize('.')[0])
                     def minorVersion = Integer.parseInt(VERSION_PREFIX.tokenize('.')[1])
-
+        
                     // Convert BUILD_NUMBER to integer and calculate the beta version
-                    def buildNumber = Integer.parseInt(BUILD_NUMBER)
+                    def buildNumber = BUILD_NUMBER.toInteger()
                     def betaVersion = "${majorVersion}.${minorVersion}.${buildNumber % (MAX_BUILD_NUMBER + 1)}-beta"
-
+        
                     sh 'chmod +x automations/bin/*.sh && automations/bin/compile.sh "maven_extra_arguments=-s .m2/settings.xml" "version=${betaVersion}" "sonar_url=$SONAR_URL" "sonar_project_key=$SONAR_PROJECT_KEY" "sonar_project_name=$SONAR_PROJECT_NAME" && mkdir -p publish-artifacts && cp target/hello-world-web.war publish-artifacts/hello-world-web-${betaVersion}.war'
                 }
             }
         }
+
     }
     
     post {
