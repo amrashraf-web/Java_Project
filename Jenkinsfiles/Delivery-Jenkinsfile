@@ -1,0 +1,38 @@
+pipeline {
+    agent any
+    environment {
+        sonar_url = 'http://amrashraf.com:9000/sonarqube'
+        sonar_project_key = 'my-java-app'
+        sonar_project_name = 'my-java-app'
+        version = "v${BUILD_NUMBER}"
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    def gitCredentialsId = 'github_key'
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: 'develop']],
+                        userRemoteConfigs: [[
+                            url: 'https://github.com/amrashraf-web/Java_Project.git',
+                            credentialsId: gitCredentialsId
+                        ]]
+                    ])
+                }
+            }
+        }
+        stage('Build and Test') {
+            steps {
+                sh 'chmod +x automations/bin/*.sh && automations/bin/compile.sh \"maven_extra_arguments=-s .m2/settings.xml\" \"version=$version\" \"sonar_url=$SONAR_URL\" \"sonar_project_key=$SONAR_PROJECT_KEY\" \"sonar_project_name=$SONAR_PROJECT_NAME\" && mkdir -p publish-artifacts && cp target/my-java-app-0.0.4-SNAPSHOT.jar publish-artifacts/my-java-app-$version.jar'
+            }
+        }
+    }
+    
+    post {
+        success {
+            archiveArtifacts 'target/hello-world-web.war'
+        }
+    }
+
+}
