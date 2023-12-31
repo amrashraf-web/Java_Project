@@ -31,8 +31,9 @@ pipeline {
     
     post {
         success {
-            archiveArtifacts "publish-artifacts/hello-world-web-$version.war"
+            archiveArtifacts artifacts: 'publish-artifacts/hello-world-web-$version.war', onlyIfSuccessful: true
         }
     }
+
 
 }
