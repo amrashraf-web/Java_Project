@@ -33,12 +33,27 @@ pipeline {
                 script {
                     def majorVersion = Integer.parseInt(VERSION_PREFIX.tokenize('.')[0])
                     def minorVersion = Integer.parseInt(VERSION_PREFIX.tokenize('.')[1])
+                    
                     // Convert BUILD_NUMBER to integer and calculate the beta version
                     def buildNumber = BUILD_NUMBER.toInteger()
                     def maxBuildNumber = MAX_BUILD_NUMBER.toInteger()
-                    betaVersion = "${majorVersion}.${minorVersion}.${buildNumber % (maxBuildNumber + 1)}-beta"
+                    
+                    // Check if BUILD_NUMBER is 9, then increment minorVersion and reset BUILD_NUMBER to 0
+                    if (buildNumber == 9) {
+                        minorVersion++
+                        buildNumber = 0
+                    }
+                    
+                    betaVersion = "${majorVersion}.${minorVersion}.${buildNumber}-beta"
+                    
+                    // Update the environment variables
+                    env.VERSION_PREFIX = "${majorVersion}.${minorVersion}"
+                    env.BUILD_NUMBER = "${buildNumber}"
+        
                     sh """
                        echo \"${betaVersion}\"
+                       echo \"VERSION_PREFIX=${VERSION_PREFIX}\" > ${WORKSPACE}/version.properties
+                       echo \"BUILD_NUMBER=${BUILD_NUMBER}\" >> ${WORKSPACE}/version.properties
                        chmod +x \"${WORKSPACE}/automations/bin\"/*.sh &&
                        \"${WORKSPACE}/automations/bin/compile.sh\" "maven_extra_arguments=-s .m2/settings.xml" "version=${betaVersion}" "sonar_url=$SONAR_URL" "sonar_project_key=$SONAR_PROJECT_KEY" "sonar_project_name=$SONAR_PROJECT_NAME" &&
                        mkdir -p \"${WORKSPACE}/publish-artifacts\" &&
@@ -47,6 +62,7 @@ pipeline {
                 }
             }
         }
+
     }
 
     post {
