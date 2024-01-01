@@ -6,7 +6,7 @@ pipeline {
         sonar_project_key = 'my-java-app'
         sonar_project_name = 'my-java-app'
         VERSION_PREFIX = '0.1.'
-        BETA_VERSION_FILE = "/home/amrashraf/beta_version.txt"
+        BETA_VERSION_FILE = "${HOME}/beta_version.txt"
     }
 
     stages {
