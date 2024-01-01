@@ -7,6 +7,7 @@ pipeline {
         sonar_project_name = 'my-java-app'
         VERSION_PREFIX = '0.1.'
         BETA_VERSION_FILE = "${HOME}/beta_version.txt"
+        nexus_url = 'amrashraf.com:8082'
     }
 
     stages {
@@ -54,6 +55,18 @@ pipeline {
                        mkdir -p \"${WORKSPACE}/publish-artifacts\" &&
                        cp target/hello-world-web.war \"${WORKSPACE}/publish-artifacts/hello-world-web-${betaVersion}.war\"
                     """
+                }
+            }
+        }
+        stage('Docker Build') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'jenkins-nexus', passwordVariable: 'Nexus_Password', usernameVariable: 'Nexus_Username')]) {
+                        sh "docker login ${nexus_url} -u ${Nexus_Username} -p ${Nexus_Password}"
+                    }
+
+                    def dockerImageTag = "${nexus_url}/my-java-app:${betaVersion}"
+                    sh "docker build -t ${dockerImageTag} -f Dockerfile ."
                 }
             }
         }
