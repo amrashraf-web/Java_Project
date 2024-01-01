@@ -62,7 +62,7 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'nexus', passwordVariable: 'Nexus_Password', usernameVariable: 'Nexus_Username')]) {
-                        sh "docker login ${nexus_url} -u ${Nexus_Username} -p ${Nexus_Password}"
+                        sh "echo ${Nexus_Password} | docker login --username ${Nexus_Username} --password-stdin ${nexus_url}"
                     }
 
                     def dockerImageTag = "${nexus_url}/my-java-app:${betaVersion}"
