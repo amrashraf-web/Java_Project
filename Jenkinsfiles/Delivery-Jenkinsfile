@@ -89,12 +89,16 @@ pipeline {
                 script {
                     sh "docker push ${nexus_url}/my-java-app:${betaVersion}"
                     def helmPackageRepo = "http://amrashraf.com:8081/repository/my-java-app-helm/"
-        
-                    // Construct the full URL for uploading the Helm chart
                     def uploadUrl = "${helmPackageRepo}my-java-app-${betaVersion}.tar.gz"
         
+                    echo "Uploading Helm chart to: ${uploadUrl}"
+        
                     // Publish Helm package file to Nexus
-                    sh "curl -v -u admin:admin --upload-file mychart/my-java-app-${betaVersion}.tar.gz ${uploadUrl}"
+                    def result = sh(script: "curl -v -u admin:admin --upload-file mychart/my-java-app-${betaVersion}.tar.gz ${uploadUrl}", returnStatus: true)
+        
+                    if (result != 0) {
+                        error "Failed to upload Helm chart. Exit code: ${result}"
+                    }
                 }
             }
         }
