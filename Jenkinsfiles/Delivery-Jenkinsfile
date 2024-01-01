@@ -99,7 +99,7 @@ pipeline {
                         artifacts: [
                             [artifactId: '',
                              classifier: '',
-                             file: 'mychart/my-java-app-' + version + '.tar.gz',
+                             file: 'mychart/my-java-app-' + "${betaVersion}", + '.tar.gz',
                              type: 'tar']
                         ]
                      )
