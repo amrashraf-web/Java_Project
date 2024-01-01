@@ -87,7 +87,7 @@ pipeline {
         stage('Publish to Nexus') {
             steps {
                 script {
-                    def helmPackageRepo = "amrashraf.com/nexus/repository/my-java-app-helm/my-java-app-helm:${betaVersion}"
+                    def helmPackageRepo = "amrashraf.com:8081/repository/my-java-app-helm:${betaVersion}"
                     sh "docker push ${nexus_url}/my-java-app:${betaVersion}"
     
                     // Publish Helm package file to Nexus
