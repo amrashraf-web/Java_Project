@@ -58,18 +58,18 @@ pipeline {
                 }
             }
         }
-        // stage('Docker Build') {
-        //     steps {
-        //         script {
-        //             withCredentials([usernamePassword(credentialsId: 'nexus', passwordVariable: 'Nexus_Password', usernameVariable: 'Nexus_Username')]) {
-        //                 sh "echo ${Nexus_Password} | docker login --username ${Nexus_Username} --password-stdin ${nexus_url}"
-        //             }
+        stage('Docker Build') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'nexus', passwordVariable: 'Nexus_Password', usernameVariable: 'Nexus_Username')]) {
+                        sh "echo ${Nexus_Password} | docker login --username ${Nexus_Username} --password-stdin ${nexus_url}"
+                    }
 
-        //             def dockerImageTag = "${nexus_url}/my-java-app:${betaVersion}"
-        //             sh "docker build -t ${dockerImageTag} -f Dockerfile ."
-        //         }
-        //     }
-        // }
+                    def dockerImageTag = "${nexus_url}/my-java-app:${betaVersion}"
+                    sh "docker build -t ${dockerImageTag} -f Dockerfile ."
+                }
+            }
+        }
         stage('Helm Package') {
             steps {
                 script {
@@ -84,7 +84,18 @@ pipeline {
             }
         }
     }
+    stage('Publish to Nexus') {
+        steps {
+            script {
+                def dockerImageRepo = "amrashraf.com/my-java-app:${betaVersion}"
+                def helmPackageRepo = "amrashraf.com/my-java-app-helm:${betaVersion}"
+                sh "docker push ${dockerImageRepo}"
 
+                // Publish Helm package file to Nexus
+                sh "curl -v -u ${NEXUS_USERNAME}:${NEXUS_PASSWORD} --upload-file mychart/my-java-app-${betaVersion}.tar.gz ${NEXUS_URL}/repository/my-java-app-helm/${helmPackageRepo}"
+            }
+        }
+    }
     post {
         success {
             script {
