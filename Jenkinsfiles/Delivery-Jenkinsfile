@@ -97,10 +97,10 @@ pipeline {
                         repository: 'my-java-app-helm',
                         credentialsId: 'nexus',
                         artifacts: [
-                            [artifactId: projectName,
+                            [artifactId: my-java-app,
                              classifier: '',
-                             file: 'my-java-app-' + version + '.war',
-                             type: 'war']
+                             file: 'mychart/my-java-app-' + version + '.tar.gz',
+                             type: 'tar']
                         ]
                      )
                 }
