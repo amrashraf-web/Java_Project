@@ -77,7 +77,7 @@ pipeline {
                     def helmPackagePath = "my-java-app-${betaVersion}.tar.gz"
                     sh """
                         cd ${helmChartDir}
-                        sed -i "s#PLACEHOLDER_VERSION#${betaVersion}#g" *
+                        sed -i "s#PLACEHOLDER_VERSION#${betaVersion}#g" values.yaml
                         tar cfz ${helmPackagePath} *
                     """
                 }
