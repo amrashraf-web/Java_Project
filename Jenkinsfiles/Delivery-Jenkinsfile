@@ -91,7 +91,7 @@ pipeline {
                     sh "docker push ${nexus_url}/my-java-app:${betaVersion}"
     
                     // Publish Helm package file to Nexus
-                    sh "curl -v -u admin:admin --upload-file mychart/my-java-app-${betaVersion}.tar.gz ${NEXUS_URL}/repository/my-java-app-helm/${helmPackageRepo}"
+                    sh "curl -v -u admin:admin --upload-file mychart/my-java-app-${betaVersion}.tar.gz ${helmPackageRepo}"
                 }
             }
         }
