@@ -100,7 +100,7 @@ pipeline {
                             [
                                 artifactId: 'my-java-app',
                                 classifier: '',
-                                file: 'mychart/my-java-app-betaVersion.tar.gz',
+                                file: "mychart/my-java-app-${betaVersion}.tar.gz",
                                 type: 'tar.gz'
                             ]
                         ]
