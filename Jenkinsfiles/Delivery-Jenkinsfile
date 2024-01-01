@@ -28,6 +28,7 @@ pipeline {
                             credentialsId: gitCredentialsId
                         ]]
                     ])
+                    sh "git clean -dfx"
                 }
             }
         }
@@ -66,9 +67,6 @@ pipeline {
                 sh "echo '${betaVersion}' >> ${BETA_VERSION_FILE}"
             }
             archiveArtifacts "publish-artifacts/hello-world-web-${betaVersion}.war"
-        }
-        always {
-            echo "Cleaning up..."
         }
     }
 
