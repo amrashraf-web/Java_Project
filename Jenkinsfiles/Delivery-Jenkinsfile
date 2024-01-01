@@ -93,13 +93,13 @@ pipeline {
                         protocol: 'http',
                         nexusUrl: 'amrashraf.com:8081',
                         groupId: 'com.example',
-                        version: version,
+                        version: ${betaVersion},
                         repository: 'my-java-app-helm',
                         credentialsId: 'nexus',
                         artifacts: [
                             [artifactId: projectName,
                              classifier: '',
-                             file: 'my-java-app-' + ${betaVersion} + '.war',
+                             file: 'my-java-app-' + version + '.war',
                              type: 'war']
                         ]
                      )
