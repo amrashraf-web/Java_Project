@@ -58,18 +58,18 @@ pipeline {
                 }
             }
         }
-        stage('Docker Build') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'nexus', passwordVariable: 'Nexus_Password', usernameVariable: 'Nexus_Username')]) {
-                        sh "echo ${Nexus_Password} | docker login --username ${Nexus_Username} --password-stdin ${nexus_url}"
-                    }
+        // stage('Docker Build') {
+        //     steps {
+        //         script {
+        //             withCredentials([usernamePassword(credentialsId: 'nexus', passwordVariable: 'Nexus_Password', usernameVariable: 'Nexus_Username')]) {
+        //                 sh "echo ${Nexus_Password} | docker login --username ${Nexus_Username} --password-stdin ${nexus_url}"
+        //             }
 
-                    def dockerImageTag = "${nexus_url}/my-java-app:${betaVersion}"
-                    sh "docker build -t ${dockerImageTag} -f Dockerfile ."
-                }
-            }
-        }
+        //             def dockerImageTag = "${nexus_url}/my-java-app:${betaVersion}"
+        //             sh "docker build -t ${dockerImageTag} -f Dockerfile ."
+        //         }
+        //     }
+        // }
     }
 
     post {
