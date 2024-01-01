@@ -1,5 +1,5 @@
 image:
-  repository: amrashraf.com:8082/my-java-app:latest
+  repository: amrashraf.com:8082/my-java-app:PLACEHOLDER_VERSION
   pullPolicy: IfNotPresent
 
 replicaCount: 1
