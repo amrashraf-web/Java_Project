@@ -64,7 +64,7 @@ pipeline {
                 def homeDirectory = sh(script: 'echo $HOME', returnStdout: true).trim()
                 echo "Home Directory: ${homeDirectory}"
                 echo "Writing beta version to: ${BETA_VERSION_FILE}"
-                writeFile file: "${BETA_VERSION_FILE}", text: "${betaVersion}"
+                sh "echo '${betaVersion}' >> ${BETA_VERSION_FILE}"
             }
             archiveArtifacts "publish-artifacts/hello-world-web-${betaVersion}.war"
         }
