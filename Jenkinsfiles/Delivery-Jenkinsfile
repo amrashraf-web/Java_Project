@@ -83,16 +83,17 @@ pipeline {
                 }
             }
         }
-    }
-    stage('Publish to Nexus') {
-        steps {
-            script {
-                def dockerImageRepo = "amrashraf.com/my-java-app:${betaVersion}"
-                def helmPackageRepo = "amrashraf.com/my-java-app-helm:${betaVersion}"
-                sh "docker push ${dockerImageRepo}"
-
-                // Publish Helm package file to Nexus
-                sh "curl -v -u ${NEXUS_USERNAME}:${NEXUS_PASSWORD} --upload-file mychart/my-java-app-${betaVersion}.tar.gz ${NEXUS_URL}/repository/my-java-app-helm/${helmPackageRepo}"
+    
+        stage('Publish to Nexus') {
+            steps {
+                script {
+                    def dockerImageRepo = "amrashraf.com/my-java-app:${betaVersion}"
+                    def helmPackageRepo = "amrashraf.com/my-java-app-helm:${betaVersion}"
+                    sh "docker push ${dockerImageRepo}"
+    
+                    // Publish Helm package file to Nexus
+                    sh "curl -v -u ${NEXUS_USERNAME}:${NEXUS_PASSWORD} --upload-file mychart/my-java-app-${betaVersion}.tar.gz ${NEXUS_URL}/repository/my-java-app-helm/${helmPackageRepo}"
+                }
             }
         }
     }
