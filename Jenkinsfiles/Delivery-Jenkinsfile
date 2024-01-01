@@ -61,7 +61,7 @@ pipeline {
     post {
         success {
             script {
-                writeFile file: "${BETA_VERSION_FILE}", text: "${betaVersion}"
+                writeFile file: "${WORKSPACE}/beta_version.txt", text: "${betaVersion}"
             }
             archiveArtifacts "publish-artifacts/hello-world-web-${betaVersion}.war"
         }
