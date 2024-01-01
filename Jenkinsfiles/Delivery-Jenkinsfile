@@ -6,6 +6,7 @@ pipeline {
         sonar_project_key = 'my-java-app'
         sonar_project_name = 'my-java-app'
         VERSION_PREFIX = '0.1.'
+        BETA_VERSION_FILE = "${HOME}/beta_version.txt"
     }
 
     stages {
@@ -59,6 +60,9 @@ pipeline {
 
     post {
         success {
+            script {
+                writeFile file: "${BETA_VERSION_FILE}", text: "${betaVersion}"
+            }
             archiveArtifacts "publish-artifacts/hello-world-web-${betaVersion}.war"
         }
         always {
