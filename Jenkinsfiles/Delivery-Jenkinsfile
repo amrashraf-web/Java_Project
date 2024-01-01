@@ -93,7 +93,7 @@ pipeline {
                         protocol: 'http',
                         nexusUrl: 'amrashraf.com:8081',
                         groupId: 'com.example',
-                        version: ${betaVersion},
+                        version: "${betaVersion}",
                         repository: 'my-java-app-helm',
                         credentialsId: 'nexus',
                         artifacts: [
