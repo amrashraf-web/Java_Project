@@ -61,6 +61,9 @@ pipeline {
     post {
         success {
             script {
+                def homeDirectory = sh(script: 'echo $HOME', returnStdout: true).trim()
+                echo "Home Directory: ${homeDirectory}"
+                echo "Writing beta version to: ${BETA_VERSION_FILE}"
                 writeFile file: "${BETA_VERSION_FILE}", text: "${betaVersion}"
             }
             archiveArtifacts "publish-artifacts/hello-world-web-${betaVersion}.war"
@@ -69,4 +72,5 @@ pipeline {
             echo "Cleaning up..."
         }
     }
+
 }
