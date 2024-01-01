@@ -70,6 +70,19 @@ pipeline {
         //         }
         //     }
         // }
+        stage('Helm Package') {
+            steps {
+                script {
+                    def helmChartDir = "mychart"
+                    def helmPackagePath = "my-java-app-${betaVersion}.tar.gz"
+                    sh """
+                        cd ${helmChartDir}
+                        sed -i "s#PLACEHOLDER_VERSION#${betaVersion}#g" *
+                        tar cfz ${helmPackagePath} *
+                    """
+                }
+            }
+        }
     }
 
     post {
