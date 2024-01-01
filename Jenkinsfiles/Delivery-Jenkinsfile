@@ -88,7 +88,7 @@ pipeline {
             steps {
                 script {
                     sh "docker push ${nexus_url}/my-java-app:${betaVersion}"
-                    def helmPackageRepo = "http://amrashraf.com:8081/repository/my-java-app-helm/"
+                    def helmPackageRepo = "http://amrashraf.com:8081/repository/my-java-app-helm/com/example/my-artifact/1.0.0"
                     def uploadUrl = "${helmPackageRepo}my-java-app-${betaVersion}.tar.gz"
         
                     echo "Uploading Helm chart to: ${uploadUrl}"
