@@ -41,11 +41,19 @@ pipeline {
         
                     // If 'git describe' fails, create a new tag and use it as the last version
                     if (lastTag == "0.0.0") {
-                        // Create a new tag based on the current timestamp
-                        def newTagName = "v" + new Date().format("yyyyMMdd-HHmmss")
-                        
-                        // Create the tag and push it
-                        sh "git tag ${newTagName} && git push origin ${newTagName}"
+                        // Get the latest beta version
+                        def latestBetaVersion = sh(script: 'git tag -l "0.0.*-beta" | sort -V | tail -n 1', returnStdout: true).trim()
+        
+                        // Extract the beta version and increment it
+                        def betaVersion = latestBetaVersion ? latestBetaVersion.replaceAll(/.*\.(.*)-beta/, { _, betaVersion -> "${betaVersion.toInteger() + 1}" }) : 1
+        
+                        // Create a new tag with the incremented beta version
+                        def newTagName = "0.0.${betaVersion}-beta"
+        
+                        // Create the tag and push it using GitHub credentials
+                        withCredentials([usernamePassword(credentialsId: 'github_key', passwordVariable: 'GITHUB_PASSWORD', usernameVariable: 'GITHUB_USERNAME')]) {
+                            sh "git tag ${newTagName} && git push origin ${newTagName}"
+                        }
         
                         // Use the newly created tag as the last version
                         lastTag = newTagName
@@ -63,6 +71,8 @@ pipeline {
                 }
             }
         }
+
+
 
         stage('Build and Test') {
             steps {
