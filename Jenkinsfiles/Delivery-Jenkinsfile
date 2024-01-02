@@ -37,7 +37,13 @@ pipeline {
             steps {
                 script {
                     // Get the last Git tag on the develop branch
-                    def lastVersion = sh(script: 'git describe --tags --abbrev=0 || git log --pretty=format:"%h" -n 1 || echo "0.0.0"', returnStdout: true).trim()
+                    def lastTag = sh(script: 'git describe --tags --abbrev=0', returnStdout: true).trim()
+        
+                    // Get the hash of the last commit on the develop branch
+                    def lastCommitHash = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+        
+                    // Use the last tag if available, otherwise use the commit hash as a fallback
+                    def lastVersion = lastTag ?: lastCommitHash ?: '0.0.0'
         
                     // Extract the patch version and increment it
                     def newVersion = lastVersion.replaceAll(/.*\.(.*)\..*/, { _, patchVersion -> "${patchVersion.toInteger() + 1}" })
@@ -51,6 +57,7 @@ pipeline {
                 }
             }
         }
+
 
 
         stage('Build and Test') {
