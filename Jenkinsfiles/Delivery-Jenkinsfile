@@ -35,78 +35,36 @@ pipeline {
                 }
             }
         }
-        stage('Get Last Version') {
-            steps {
-                script {
-                    // Get the last Git tag on the develop branch
-                    def lastTag = sh(script: 'git describe --tags --abbrev=0 || echo "0.0.0"', returnStdout: true).trim()
-        
-                    // If 'git describe' fails, create a new tag and use it as the last version
-                    if (lastTag == "0.0.0") {
-                        // Get the latest beta version
-                        def latestBetaVersion = sh(script: 'git tag -l "0.0.*-beta" | sort -V | tail -n 1', returnStdout: true).trim()
-        
-                        def betaVersion
-                        
-                        if (latestBetaVersion) {
-                            def match = latestBetaVersion =~ /.*\.(.*)-beta/
-                            betaVersion = match ? "${match[0][1]?.toInteger() + 1}" : 1
+        stages {
+            stage('Get Latest Version') {
+                steps {
+                    script {
+                        def currentVersion = sh(script: 'git describe --tags --abbrev=0', returnStdout: true).trim()
+    
+                        if (currentVersion.isEmpty()) {
+                            // No tags found, create a new version
+                            currentVersion = '0.0.1-beta'
                         } else {
-                            betaVersion = 1
+                            // Increment the last part of the version
+                            def versionParts = currentVersion.split('-')
+                            def lastPart = versionParts[1].toInteger() + 1
+                            currentVersion = "${versionParts[0]}-${lastPart}"
                         }
-
-        
-                        // Create a new tag with the incremented beta version
-                        def newTagName = "0.0.${betaVersion}-beta"
-
-                        // Create the tag and push it using GitHub credentials
-                        withCredentials([usernamePassword(credentialsId: 'github_key', passwordVariable: 'Github_password', usernameVariable: 'Github_username')]) {
-                            sh "git tag 0.0.${betaVersion}-beta"
-                            sh "git push https://${GITHUB_USERNAME}:${GITHUB_PASSWORD}@github.com/${GITHUB_USERNAME}/Java_Project.git refs/tags/0.0.${betaVersion}-beta:refs/heads/develop"
-                        }
-                        
-                        
-                        // Use the newly created tag as the last version
-                        lastTag = newTagName
+    
+                        // Set the version as an environment variable
+                        env.NEW_VERSION = currentVersion
                     }
-        
-                    // Extract the patch version and increment it
-                    def newVersion
-                    
-                    if (lastTag) {
-                        def match = lastTag =~ /.*\.(.*)\..*/
-                        newVersion = match ? "${match[0][1]?.toInteger() + 1}" : lastTag
-                    } else {
-                        newVersion = "0.0.1"
-                    }
-
-                    // Print the last version and the new version
-                    echo "Last version: ${lastTag}"
-                    echo "New version: ${newVersion}"
-        
-                    // Write the new version back to the file
-                    writeFile(file: VERSION_FILE, text: newVersion)
                 }
             }
-        }
-
-        stage('Commit and Push Version') {
-            steps {
-                script {
-                    // Commit and push the updated version file
-                    sh "git add ${VERSION_FILE}"
-                    sh "git commit -m 'Increment version to ${newVersion}'"
-                    sh "git push origin develop"
-                }
-            }
-        }
-
-        stage('Create Tag') {
-            steps {
-                script {
-                    // Create a Git tag for the new version
-                    sh "git tag -a v${newVersion} -m 'Version ${newVersion}'"
-                    sh "git push origin v${newVersion}"
+    
+            stage('Commit and Push') {
+                steps {
+                    script {
+                        // Commit and push the new version
+                        sh "git commit -am 'Bump version to ${env.NEW_VERSION}'"
+                        sh "git tag ${env.NEW_VERSION}"
+                        sh 'git push origin develop --tags'
+                    }
                 }
             }
         }
