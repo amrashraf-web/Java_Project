@@ -69,8 +69,15 @@ pipeline {
                     }
         
                     // Extract the patch version and increment it
-                    def newVersion = lastTag.replaceAll(/.*\.(.*)\..*/, { _, patchVersion -> "${patchVersion.toInteger() + 1}" })
-        
+                    def newVersion
+                    
+                    if (lastTag) {
+                        def match = lastTag =~ /.*\.(.*)\..*/
+                        newVersion = match ? "${match[0][1]?.toInteger() + 1}" : lastTag
+                    } else {
+                        newVersion = "0.0.1"
+                    }
+
                     // Print the last version and the new version
                     echo "Last version: ${lastTag}"
                     echo "New version: ${newVersion}"
