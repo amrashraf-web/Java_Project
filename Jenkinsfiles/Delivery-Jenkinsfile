@@ -38,14 +38,14 @@ pipeline {
         stage('Get Latest Version') {
             steps {
                 script {
-                    def currentVersion = sh(script: 'git describe --tags --abbrev=0 || echo "No tags"', returnStatus: true, returnStdout: true).trim()
+                    def currentVersion = sh(script: 'git describe --tags --abbrev=0', returnStdout: true, returnStatus: true)
         
-                    if (currentVersion == 'No tags') {
+                    if (currentVersion != 0) {
                         // No tags found, create a new version
                         currentVersion = '0.0.1-beta'
                     } else {
                         // Increment the last part of the version
-                        def versionParts = currentVersion.split('-')
+                        def versionParts = currentVersion.trim().split('-')
                         def lastPart = versionParts[1].toInteger() + 1
                         currentVersion = "${versionParts[0]}-${lastPart}"
                     }
@@ -55,6 +55,7 @@ pipeline {
                 }
             }
         }
+
 
 
 
