@@ -78,7 +78,8 @@ pipeline {
                     sh """
                         cd ${helmChartDir}
                         sed -i "s#PLACEHOLDER_VERSION#${betaVersion}#g" values.yaml
-                        tar cfz ${helmPackagePath} *
+                        helm package --destination . --save=false .
+                        mv mychart-0.1.0.tgz my-java-app-${betaVersion}.tgz
                     """
                 }
             }
@@ -88,7 +89,7 @@ pipeline {
             steps {
                 script {
                     sh "docker push ${nexus_url}/my-java-app:${betaVersion}"
-                    sh "curl -v -u admin:admin --upload-file mychart/my-java-app-${betaVersion}.tar.gz http://amrashraf.com:8081/repository/my-java-app-helm/my-java-app-${betaVersion}.tar.gz"
+                    sh "curl -v -u admin:admin --upload-file mychart/my-java-app-${betaVersion}.tgz http://amrashraf.com:8081/repository/my-java-app-helm/my-chart-app-${betaVersion}.tgz"
 
                 }
             }
