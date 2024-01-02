@@ -78,7 +78,7 @@ pipeline {
                     sh """
                         cd ${helmChartDir}
                         sed -i "s#PLACEHOLDER_VERSION#${betaVersion}#g" values.yaml
-                        helm package --destination . --save=false .
+                        helm package .
                         mv mychart-0.1.0.tgz my-java-app-${betaVersion}.tgz
                     """
                 }
