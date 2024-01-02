@@ -8,7 +8,7 @@ pipeline {
         VERSION_PREFIX = '0.1.'
         BETA_VERSION_FILE = "${HOME}/beta_version.txt"
         nexus_url = 'amrashraf.com:8082'
-        VERSION_FILE = '${HOME}/version.txt'
+        VERSION_FILE = 'version.txt'
     }
                         
     stages {
