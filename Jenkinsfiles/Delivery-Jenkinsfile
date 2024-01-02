@@ -58,8 +58,7 @@ pipeline {
                         }
                         
                         // Use the environment variables in the sh command
-                        sh "git tag ${newTagName} && git push https://${GITHUB_USERNAME}:${GITHUB_PASSWORD}@github.com/your-username/your-repo.git ${newTagName}"
-
+                        sh "git tag ${newTagName} && git push https://${GITHUB_USERNAME}:${GITHUB_PASSWORD}@github.com/${GITHUB_USERNAME}/Java_Project.git refs/tags/${newTagName}:refs/heads/develop"
         
                         // Use the newly created tag as the last version
                         lastTag = newTagName
