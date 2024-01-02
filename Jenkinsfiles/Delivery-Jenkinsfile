@@ -44,8 +44,14 @@ pipeline {
                         // Get the latest beta version
                         def latestBetaVersion = sh(script: 'git tag -l "0.0.*-beta" | sort -V | tail -n 1', returnStdout: true).trim()
         
-                        // Extract the beta version and increment it
-                        def betaVersion = latestBetaVersion ? (latestBetaVersion =~ /.*\.(.*)-beta/) ? "${it[1].toInteger() + 1}" : 1 : 1
+                        def betaVersion
+                        
+                        if (latestBetaVersion) {
+                            def match = latestBetaVersion =~ /.*\.(.*)-beta/
+                            betaVersion = match ? "${match[0][1].toInteger() + 1}" : 1
+                        } else {
+                            betaVersion = 1
+                        }
         
                         // Create a new tag with the incremented beta version
                         def newTagName = "0.0.${betaVersion}-beta"
