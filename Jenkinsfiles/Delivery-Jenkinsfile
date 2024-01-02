@@ -8,8 +8,6 @@ pipeline {
         VERSION_PREFIX = '0.1.'
         BETA_VERSION_FILE = "${HOME}/beta_version.txt"
         nexus_url = 'amrashraf.com:8082'
-        git_username = credentials('github_key').username
-        git_password = credentials('github_key').password
     }
                         
     stages {
