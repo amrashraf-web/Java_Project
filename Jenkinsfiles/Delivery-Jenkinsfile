@@ -8,8 +8,10 @@ pipeline {
         VERSION_PREFIX = '0.1.'
         BETA_VERSION_FILE = "${HOME}/beta_version.txt"
         nexus_url = 'amrashraf.com:8082'
+        GITHUB_USERNAME = credentials('github_key').username
+        GITHUB_PASSWORD = credentials('github_key').password
     }
-
+                        
     stages {
         stage('Reset Workspace') {
             steps {
@@ -51,13 +53,6 @@ pipeline {
                         def newTagName = "0.0.${betaVersion}-beta"
         
                         // Create the tag and push it using GitHub credentials
-                        // Define your GitHub username and password as environment variables
-                        environment {
-                            GITHUB_USERNAME = credentials('github_key').username
-                            GITHUB_PASSWORD = credentials('github_key').password
-                        }
-                        
-                        // Use the environment variables in the sh command
                         sh "git tag ${newTagName} && git push https://${GITHUB_USERNAME}:${GITHUB_PASSWORD}@github.com/${GITHUB_USERNAME}/Java_Project.git refs/tags/${newTagName}:refs/heads/develop"
         
                         // Use the newly created tag as the last version
