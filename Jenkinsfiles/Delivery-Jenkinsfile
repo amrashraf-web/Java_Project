@@ -1,3 +1,4 @@
+def newVersion
 pipeline {
     agent any
 
