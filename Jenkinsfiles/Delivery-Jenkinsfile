@@ -35,36 +35,34 @@ pipeline {
                 }
             }
         }
-        stages {
-            stage('Get Latest Version') {
-                steps {
-                    script {
-                        def currentVersion = sh(script: 'git describe --tags --abbrev=0', returnStdout: true).trim()
-    
-                        if (currentVersion.isEmpty()) {
-                            // No tags found, create a new version
-                            currentVersion = '0.0.1-beta'
-                        } else {
-                            // Increment the last part of the version
-                            def versionParts = currentVersion.split('-')
-                            def lastPart = versionParts[1].toInteger() + 1
-                            currentVersion = "${versionParts[0]}-${lastPart}"
-                        }
-    
-                        // Set the version as an environment variable
-                        env.NEW_VERSION = currentVersion
+        stage('Get Latest Version') {
+            steps {
+                script {
+                    def currentVersion = sh(script: 'git describe --tags --abbrev=0', returnStdout: true).trim()
+
+                    if (currentVersion.isEmpty()) {
+                        // No tags found, create a new version
+                        currentVersion = '0.0.1-beta'
+                    } else {
+                        // Increment the last part of the version
+                        def versionParts = currentVersion.split('-')
+                        def lastPart = versionParts[1].toInteger() + 1
+                        currentVersion = "${versionParts[0]}-${lastPart}"
                     }
+
+                    // Set the version as an environment variable
+                    env.NEW_VERSION = currentVersion
                 }
             }
-    
-            stage('Commit and Push') {
-                steps {
-                    script {
-                        // Commit and push the new version
-                        sh "git commit -am 'Bump version to ${env.NEW_VERSION}'"
-                        sh "git tag ${env.NEW_VERSION}"
-                        sh 'git push origin develop --tags'
-                    }
+        }
+
+        stage('Commit and Push') {
+            steps {
+                script {
+                    // Commit and push the new version
+                    sh "git commit -am 'Bump version to ${env.NEW_VERSION}'"
+                    sh "git tag ${env.NEW_VERSION}"
+                    sh 'git push origin develop --tags'
                 }
             }
         }
