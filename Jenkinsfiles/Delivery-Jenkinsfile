@@ -92,13 +92,13 @@ pipeline {
                         nexusVersion: 'nexus3',
                         protocol: 'http',
                         nexusUrl: 'amrashraf.com:8081',
-                        groupId: 'my-java-app',
-                        version: betaVersion,
+                        groupId: 'com.example',
+                        version: '1.0-SNAPSHOT',
                         repository: 'my-java-app-helm',
                         credentialsId: 'nexus',
                         artifacts: [
                             [
-                                artifactId: 'my-java-app',
+                                artifactId: 'hello-world-web',
                                 classifier: '',
                                 file: "mychart/my-java-app-${betaVersion}.tar.gz",
                                 type: 'tar.gz'
