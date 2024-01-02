@@ -89,79 +89,98 @@ pipeline {
             }
         }
 
-
-
-        stage('Build and Test') {
+        stage('Commit and Push Version') {
             steps {
                 script {
-                    def majorVersion = Integer.parseInt(VERSION_PREFIX.tokenize('.')[0])
-                    def minorVersion = Integer.parseInt(VERSION_PREFIX.tokenize('.')[1])
-                    def buildNumber = BUILD_NUMBER.toInteger()
-                    def minorIncrement = (buildNumber / 10).toInteger()
-                    minorVersion += minorIncrement
-                    buildNumber %= 10
-                    betaVersion = "${majorVersion}.${minorVersion}.${buildNumber}-beta"
-                    env.VERSION_PREFIX = "${majorVersion}.${minorVersion}"
-                    env.BUILD_NUMBER = "${buildNumber}"
+                    // Commit and push the updated version file
+                    sh "git add ${VERSION_FILE}"
+                    sh "git commit -m 'Increment version to ${newVersion}'"
+                    sh "git push origin develop"
+                }
+            }
+        }
+
+        stage('Create Tag') {
+            steps {
+                script {
+                    // Create a Git tag for the new version
+                    sh "git tag -a v${newVersion} -m 'Version ${newVersion}'"
+                    sh "git push origin v${newVersion}"
+                }
+            }
+        }
+
+        // stage('Build and Test') {
+        //     steps {
+        //         script {
+        //             def majorVersion = Integer.parseInt(VERSION_PREFIX.tokenize('.')[0])
+        //             def minorVersion = Integer.parseInt(VERSION_PREFIX.tokenize('.')[1])
+        //             def buildNumber = BUILD_NUMBER.toInteger()
+        //             def minorIncrement = (buildNumber / 10).toInteger()
+        //             minorVersion += minorIncrement
+        //             buildNumber %= 10
+        //             betaVersion = "${majorVersion}.${minorVersion}.${buildNumber}-beta"
+        //             env.VERSION_PREFIX = "${majorVersion}.${minorVersion}"
+        //             env.BUILD_NUMBER = "${buildNumber}"
         
-                    sh """
-                       echo \"${betaVersion}\"
-                       echo \"VERSION_PREFIX=${VERSION_PREFIX}\" > ${WORKSPACE}/version.properties
-                       echo \"BUILD_NUMBER=${BUILD_NUMBER}\" >> ${WORKSPACE}/version.properties
-                       chmod +x \"${WORKSPACE}/automations/bin\"/*.sh &&
-                       \"${WORKSPACE}/automations/bin/compile.sh\" "maven_extra_arguments=-s .m2/settings.xml" "version=${betaVersion}" "sonar_url=$SONAR_URL" "sonar_project_key=$SONAR_PROJECT_KEY" "sonar_project_name=$SONAR_PROJECT_NAME" &&
-                       mkdir -p \"${WORKSPACE}/publish-artifacts\" &&
-                       cp target/hello-world-web.war \"${WORKSPACE}/publish-artifacts/hello-world-web-${betaVersion}.war\"
-                    """
-                }
-            }
-        }
-        stage('Docker Build') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'nexus', passwordVariable: 'Nexus_Password', usernameVariable: 'Nexus_Username')]) {
-                        sh "echo ${Nexus_Password} | docker login --username ${Nexus_Username} --password-stdin ${nexus_url}"
-                    }
+        //             sh """
+        //                echo \"${betaVersion}\"
+        //                echo \"VERSION_PREFIX=${VERSION_PREFIX}\" > ${WORKSPACE}/version.properties
+        //                echo \"BUILD_NUMBER=${BUILD_NUMBER}\" >> ${WORKSPACE}/version.properties
+        //                chmod +x \"${WORKSPACE}/automations/bin\"/*.sh &&
+        //                \"${WORKSPACE}/automations/bin/compile.sh\" "maven_extra_arguments=-s .m2/settings.xml" "version=${betaVersion}" "sonar_url=$SONAR_URL" "sonar_project_key=$SONAR_PROJECT_KEY" "sonar_project_name=$SONAR_PROJECT_NAME" &&
+        //                mkdir -p \"${WORKSPACE}/publish-artifacts\" &&
+        //                cp target/hello-world-web.war \"${WORKSPACE}/publish-artifacts/hello-world-web-${betaVersion}.war\"
+        //             """
+        //         }
+        //     }
+        // }
+        // stage('Docker Build') {
+        //     steps {
+        //         script {
+        //             withCredentials([usernamePassword(credentialsId: 'nexus', passwordVariable: 'Nexus_Password', usernameVariable: 'Nexus_Username')]) {
+        //                 sh "echo ${Nexus_Password} | docker login --username ${Nexus_Username} --password-stdin ${nexus_url}"
+        //             }
 
-                    def dockerImageTag = "${nexus_url}/my-java-app:${betaVersion}"
-                    sh "docker build -t ${dockerImageTag} -f Dockerfile ."
-                }
-            }
-        }
-        stage('Helm Package') {
-            steps {
-                script {
-                    def helmChartDir = "mychart"
-                    def helmPackagePath = "my-java-app-${betaVersion}.tar.gz"
-                    sh """
-                        cd ${helmChartDir}
-                        sed -i "s#PLACEHOLDER_VERSION#${betaVersion}#g" values.yaml
-                        helm package .
-                        mv mychart-0.1.0.tgz my-java-app-${betaVersion}.tgz
-                    """
-                }
-            }
-        }
+        //             def dockerImageTag = "${nexus_url}/my-java-app:${betaVersion}"
+        //             sh "docker build -t ${dockerImageTag} -f Dockerfile ."
+        //         }
+        //     }
+        // }
+        // stage('Helm Package') {
+        //     steps {
+        //         script {
+        //             def helmChartDir = "mychart"
+        //             def helmPackagePath = "my-java-app-${betaVersion}.tar.gz"
+        //             sh """
+        //                 cd ${helmChartDir}
+        //                 sed -i "s#PLACEHOLDER_VERSION#${betaVersion}#g" values.yaml
+        //                 helm package .
+        //                 mv mychart-0.1.0.tgz my-java-app-${betaVersion}.tgz
+        //             """
+        //         }
+        //     }
+        // }
     
-        stage('Publish to Nexus') {
-            steps {
-                script {
-                    sh "docker push ${nexus_url}/my-java-app:${betaVersion}"
-                    sh "curl -v -u admin:admin --upload-file mychart/my-java-app-${betaVersion}.tgz http://amrashraf.com:8081/repository/my-java-app-helm/my-chart-app-${betaVersion}.tgz"
+        // stage('Publish to Nexus') {
+        //     steps {
+        //         script {
+        //             sh "docker push ${nexus_url}/my-java-app:${betaVersion}"
+        //             sh "curl -v -u admin:admin --upload-file mychart/my-java-app-${betaVersion}.tgz http://amrashraf.com:8081/repository/my-java-app-helm/my-chart-app-${betaVersion}.tgz"
 
-                }
-            }
-        }
+        //         }
+        //     }
+        // }
     }
-    post {
-        success {
-            script {
-                def homeDirectory = sh(script: 'echo $HOME', returnStdout: true).trim()
-                echo "Home Directory: ${homeDirectory}"
-                sh "echo '${betaVersion}' >> ${BETA_VERSION_FILE}"
-            }
-            archiveArtifacts "publish-artifacts/hello-world-web-${betaVersion}.war"
-        }
-    }
+    // post {
+    //     success {
+    //         script {
+    //             def homeDirectory = sh(script: 'echo $HOME', returnStdout: true).trim()
+    //             echo "Home Directory: ${homeDirectory}"
+    //             sh "echo '${betaVersion}' >> ${BETA_VERSION_FILE}"
+    //         }
+    //         archiveArtifacts "publish-artifacts/hello-world-web-${betaVersion}.war"
+    //     }
+    // }
 
 }
