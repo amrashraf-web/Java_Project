@@ -33,6 +33,25 @@ pipeline {
                 }
             }
         }
+        stage('Get Last Version') {
+            steps {
+                script {
+                    // Get the last Git tag on the develop branch
+                    def lastVersion = sh(script: 'git describe --tags --abbrev=0', returnStdout: true).trim()
+
+                    // Extract the patch version and increment it
+                    def newVersion = lastVersion.replaceAll(/.*\.(.*)\..*/, { _, patchVersion -> "${patchVersion.toInteger() + 1}" })
+
+                    // Print the last version and the new version
+                    echo "Last version: ${lastVersion}"
+                    echo "New version: ${newVersion}"
+
+                    // Write the new version back to the file
+                    writeFile(file: VERSION_FILE, text: newVersion)
+                }
+            }
+        }
+
         stage('Build and Test') {
             steps {
                 script {
