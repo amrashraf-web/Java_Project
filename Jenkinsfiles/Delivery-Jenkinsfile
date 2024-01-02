@@ -51,10 +51,11 @@ pipeline {
                     }
         
                     // Set the version as an environment variable
-                    env.NEW_VERSION = currentVersion
+                    env.NEW_VERSION = currentVersion.toString()
                 }
             }
         }
+
 
 
         stage('Commit and Push') {
