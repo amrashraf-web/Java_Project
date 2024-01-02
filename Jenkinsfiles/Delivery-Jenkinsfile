@@ -38,9 +38,9 @@ pipeline {
         stage('Get Latest Version') {
             steps {
                 script {
-                    def currentVersion = sh(script: 'git describe --tags --abbrev=0', returnStdout: true).trim()
-
-                    if (currentVersion.isEmpty()) {
+                    def currentVersion = sh(script: 'git describe --tags --abbrev=0 || echo "No tags"', returnStatus: true, returnStdout: true).trim()
+        
+                    if (currentVersion == 'No tags') {
                         // No tags found, create a new version
                         currentVersion = '0.0.1-beta'
                     } else {
@@ -49,12 +49,13 @@ pipeline {
                         def lastPart = versionParts[1].toInteger() + 1
                         currentVersion = "${versionParts[0]}-${lastPart}"
                     }
-
+        
                     // Set the version as an environment variable
                     env.NEW_VERSION = currentVersion
                 }
             }
         }
+
 
         stage('Commit and Push') {
             steps {
