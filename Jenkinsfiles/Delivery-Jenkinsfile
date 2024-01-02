@@ -88,23 +88,7 @@ pipeline {
             steps {
                 script {
                     sh "docker push ${nexus_url}/my-java-app:${betaVersion}"
-                    nexusArtifactUploader(
-                        nexusVersion: 'nexus3',
-                        protocol: 'http',
-                        nexusUrl: 'amrashraf.com:8081',
-                        groupId: 'amrashraf.com',
-                        version: '0.1.0',
-                        repository: 'my-java-app-helm',
-                        credentialsId: 'nexus',
-                        artifacts: [
-                            [
-                                artifactId: 'mychart',
-                                classifier: '',
-                                file: "mychart/my-java-app-${betaVersion}.tar.gz",
-                                type: 'tar.gz'
-                            ]
-                        ]
-                    )
+                    sh "curl -v -u admin:admin --upload-file mychart/my-java-app-${betaVersion}.tar.gz http://amrashraf.com:8081/repository/my-java-app-helm/my-java-app-${betaVersion}.tar.gz"
 
                 }
             }
