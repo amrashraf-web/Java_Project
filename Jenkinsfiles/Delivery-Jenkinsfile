@@ -51,9 +51,15 @@ pipeline {
                         def newTagName = "0.0.${betaVersion}-beta"
         
                         // Create the tag and push it using GitHub credentials
-                        withCredentials([usernamePassword(credentialsId: 'github_key', passwordVariable: 'GITHUB_PASSWORD', usernameVariable: 'GITHUB_USERNAME')]) {
-                            sh "git tag ${newTagName} && git push origin ${newTagName}"
+                        // Define your GitHub username and password as environment variables
+                        environment {
+                            GITHUB_USERNAME = credentials('github_key').username
+                            GITHUB_PASSWORD = credentials('github_key').password
                         }
+                        
+                        // Use the environment variables in the sh command
+                        sh "git tag ${newTagName} && git push https://${GITHUB_USERNAME}:${GITHUB_PASSWORD}@github.com/your-username/your-repo.git ${newTagName}"
+
         
                         // Use the newly created tag as the last version
                         lastTag = newTagName
