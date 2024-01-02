@@ -8,8 +8,8 @@ pipeline {
         VERSION_PREFIX = '0.1.'
         BETA_VERSION_FILE = "${HOME}/beta_version.txt"
         nexus_url = 'amrashraf.com:8082'
-        GITHUB_USERNAME = credentials('github_key').username
-        GITHUB_PASSWORD = credentials('github_key').password
+        git_username = credentials('github_key').username
+        git_password = credentials('github_key').password
     }
                         
     stages {
@@ -53,7 +53,7 @@ pipeline {
                         def newTagName = "0.0.${betaVersion}-beta"
         
                         // Create the tag and push it using GitHub credentials
-                        sh "git tag ${newTagName} && git push https://${GITHUB_USERNAME}:${GITHUB_PASSWORD}@github.com/${GITHUB_USERNAME}/Java_Project.git refs/tags/${newTagName}:refs/heads/develop"
+                        sh "git tag ${newTagName} && git push https://${git_username}:${git_password}@github.com/${git_username}/Java_Project.git refs/tags/${newTagName}:refs/heads/develop"
         
                         // Use the newly created tag as the last version
                         lastTag = newTagName
