@@ -37,19 +37,25 @@ pipeline {
             steps {
                 script {
                     // Get the last Git tag on the develop branch
-                    def lastTag = sh(script: 'git describe --tags --abbrev=0', returnStdout: true).trim()
+                    def lastTag = sh(script: 'git describe --tags --abbrev=0 || echo "0.0.0"', returnStdout: true).trim()
         
-                    // Get the hash of the last commit on the develop branch
-                    def lastCommitHash = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                    // If 'git describe' fails, create a new tag and use it as the last version
+                    if (lastTag == "0.0.0") {
+                        // Create a new tag based on the current timestamp
+                        def newTagName = "v" + new Date().format("yyyyMMdd-HHmmss")
+                        
+                        // Create the tag and push it
+                        sh "git tag ${newTagName} && git push origin ${newTagName}"
         
-                    // Use the last tag if available, otherwise use the commit hash as a fallback
-                    def lastVersion = lastTag ?: lastCommitHash ?: '0.0.0'
+                        // Use the newly created tag as the last version
+                        lastTag = newTagName
+                    }
         
                     // Extract the patch version and increment it
-                    def newVersion = lastVersion.replaceAll(/.*\.(.*)\..*/, { _, patchVersion -> "${patchVersion.toInteger() + 1}" })
+                    def newVersion = lastTag.replaceAll(/.*\.(.*)\..*/, { _, patchVersion -> "${patchVersion.toInteger() + 1}" })
         
                     // Print the last version and the new version
-                    echo "Last version: ${lastVersion}"
+                    echo "Last version: ${lastTag}"
                     echo "New version: ${newVersion}"
         
                     // Write the new version back to the file
@@ -57,8 +63,6 @@ pipeline {
                 }
             }
         }
-
-
 
         stage('Build and Test') {
             steps {
