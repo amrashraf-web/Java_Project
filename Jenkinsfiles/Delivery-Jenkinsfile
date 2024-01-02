@@ -48,17 +48,19 @@ pipeline {
                         
                         if (latestBetaVersion) {
                             def match = latestBetaVersion =~ /.*\.(.*)-beta/
-                            betaVersion = match ? "${match[0][1].toInteger() + 1}" : 1
+                            betaVersion = match ? "${match[0][1]?.toInteger() + 1}" : 1
                         } else {
                             betaVersion = 1
                         }
+
         
                         // Create a new tag with the incremented beta version
                         def newTagName = "0.0.${betaVersion}-beta"
 
                         // Create the tag and push it using GitHub credentials
                         withCredentials([usernamePassword(credentialsId: 'github_key', passwordVariable: 'Github_password', usernameVariable: 'Github_username')]) {
-                            sh "git tag ${newTagName} && git push https://${Github_username}:${Github_password}@github.com/${Github_username}/Java_Project.git refs/tags/${newTagName}:refs/heads/develop"
+                            sh "git tag 0.0.${betaVersion}-beta"
+                            sh "git push https://${GITHUB_USERNAME}:${GITHUB_PASSWORD}@github.com/${GITHUB_USERNAME}/Java_Project.git refs/tags/0.0.${betaVersion}-beta:refs/heads/develop"
                         }
                         
                         
