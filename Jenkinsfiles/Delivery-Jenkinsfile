@@ -40,8 +40,8 @@ pipeline {
                 script {
                     def currentVersion = sh(script: 'git describe --tags --abbrev=0', returnStdout: true, returnStatus: true).trim()
         
-                    if (currentVersion.empty) {
-                        // No tags found, create a new version
+                    if (currentVersion.empty || currentVersion.startsWith("fatal:")) {
+                        // No tags found or error in git describe, create a new version
                         currentVersion = '0.0.1-beta'
                     } else {
                         // Increment the last part of the version
@@ -62,6 +62,7 @@ pipeline {
                 }
             }
         }
+
 
         stage('Commit and Push') {
             steps {
