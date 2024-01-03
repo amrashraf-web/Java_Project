@@ -135,7 +135,15 @@ def getVersionFromGitHub() {
     def version
     try {
         // Clone the repository to get the latest version
-        checkout([$class: 'GitSCM', branches: [[name: '*/develop']], credentialsId: env.GIT_CREDENTIALS_ID, url: env.GIT_REPO_URL])
+        def gitCredentialsId = 'github_key'
+        checkout([
+            $class: 'GitSCM',
+            branches: [[name: 'develop']],
+            userRemoteConfigs: [[
+                url: 'https://github.com/amrashraf-web/Java_Project.git',
+                credentialsId: gitCredentialsId
+            ]]
+        ])
         
         // Extract the latest version from the repository (replace this with your logic)
         version = sh(script: 'git describe --tags --abbrev=0', returnStdout: true).trim()
