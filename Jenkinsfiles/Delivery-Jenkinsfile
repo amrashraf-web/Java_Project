@@ -71,7 +71,7 @@ pipeline {
             steps {
                 script {
                     // Check if there are changes to commit
-                    def hasChanges = sh(script: 'git status --porcelain', returnStatus: true) == 0
+                    def hasChanges = sh(script: 'git diff --exit-code', returnStatus: true) != 0
         
                     if (hasChanges) {
                         withCredentials([usernamePassword(credentialsId: 'github_key', passwordVariable: 'Github_Password', usernameVariable: 'Github_Username')]) {
@@ -87,6 +87,7 @@ pipeline {
                 }
             }
         }
+
 
 
         // stage('Build and Test') {
