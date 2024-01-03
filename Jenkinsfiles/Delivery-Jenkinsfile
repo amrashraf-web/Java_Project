@@ -55,11 +55,11 @@ pipeline {
                             env.NEW_VERSION = currentVersion.replaceAll(/-beta-\d+$/, "-beta-${newBetaCount}")
                         } else {
                             // If no beta count found, set initial version
-                            env.NEW_VERSION = '0.0.1-beta-2'
+                            env.NEW_VERSION = '0.0.1-beta-1'
                         }
                     } else {
                         // If no tags found, set initial version
-                        env.NEW_VERSION = '0.0.1-beta-2'
+                        env.NEW_VERSION = '0.0.1-beta-1'
                     }
         
                     echo "New version: ${NEW_VERSION}"
@@ -71,9 +71,10 @@ pipeline {
             steps {
                 script {
                     // Check if there are changes to commit
-                    def hasChanges = sh(script: 'git diff --exit-code', returnStatus: true) != 0
+                    def lastCommitHash = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                    def currentCommitHash = sh(script: 'git rev-parse develop', returnStdout: true).trim()
         
-                    if (hasChanges) {
+                    if (lastCommitHash != currentCommitHash) {
                         withCredentials([usernamePassword(credentialsId: 'github_key', passwordVariable: 'Github_Password', usernameVariable: 'Github_Username')]) {
                             // Commit and push only if there are changes
                             sh 'git checkout develop'
@@ -87,8 +88,6 @@ pipeline {
                 }
             }
         }
-
-
 
         // stage('Build and Test') {
         //     steps {
