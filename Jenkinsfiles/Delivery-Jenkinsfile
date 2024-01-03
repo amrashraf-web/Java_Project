@@ -43,36 +43,30 @@ pipeline {
                     '''
                     // Check if any tags exist
                     def tagList = sh(script: 'git tag -l', returnStdout: true).trim()
-
+        
                     if (tagList) {
                         // Get the latest version from the GitHub repository
                         def currentVersion = sh(script: 'git describe --abbrev=0 --tags', returnStdout: true).trim()
-
-                        // Split the version components
-                        def versionComponents = currentVersion.split('\\.')
-
-                        // Increment the last component
-                        def lastComponent = versionComponents[-1].toInteger() + 1
-
-                        // Check if it's time to increment the second component
-                        if (lastComponent > 9) {
-                            versionComponents[-1] = '0'
-                            versionComponents[-2] = (versionComponents[-2].toInteger() + 1).toString()
+        
+                        // Extract the beta count
+                        def betaCount = currentVersion =~ /.*-beta-(\d+)$/
+                        if (betaCount) {
+                            def newBetaCount = betaCount[0][1].toInteger() + 1
+                            env.NEW_VERSION = currentVersion.replaceAll(/-beta-\d+$/, "-beta-${newBetaCount}")
                         } else {
-                            versionComponents[-1] = lastComponent.toString()
+                            // If no beta count found, set initial version
+                            env.NEW_VERSION = '0.0.1-beta-1'
                         }
-
-                        // Assemble the new version
-                        env.NEW_VERSION = versionComponents.join('.')
                     } else {
                         // If no tags found, set initial version
-                        env.NEW_VERSION = '0.0.0-beta'
+                        env.NEW_VERSION = '0.0.1-beta-1'
                     }
-
+        
                     echo "New version: ${NEW_VERSION}"
                 }
             }
         }
+
 
         stage('Commit and Push') {
             steps {
