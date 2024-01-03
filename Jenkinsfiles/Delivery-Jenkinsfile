@@ -9,6 +9,8 @@ pipeline {
         BETA_VERSION_FILE = "${HOME}/beta_version.txt"
         nexus_url = 'amrashraf.com:8082'
         VERSION_FILE = 'version.txt'
+        GIT_REPO_URL = 'https://github.com/amrashraf-web/Java_Project.git'
+        GIT_CREDENTIALS_ID = 'github_key'
     }
                         
     stages {
@@ -37,53 +39,18 @@ pipeline {
         stage('Get Latest Version') {
             steps {
                 script {
-                    sh '''
-                        chmod +x increment_version.sh
-                        ./increment_version.sh
-                    '''
-                    // Check if any tags exist
-                    def tagList = sh(script: 'git tag -l', returnStdout: true).trim()
-        
-                    if (tagList) {
-                        // Get the latest version from the GitHub repository
-                        def currentVersion = sh(script: 'git describe --abbrev=0 --tags', returnStdout: true).trim()
-        
-                        // Extract the beta count
-                        def betaCount = currentVersion =~ /.*-beta-(\d+)$/
-                        if (betaCount) {
-                            def newBetaCount = betaCount[0][1].toInteger() + 1
-                            env.NEW_VERSION = currentVersion.replaceAll(/-beta-\d+$/, "-beta-${newBetaCount}")
-                        } else {
-                            // If no beta count found, set initial version
-                            env.NEW_VERSION = '0.0.1-beta-1'
-                        }
-                    } else {
-                        // If no tags found, set initial version
-                        env.NEW_VERSION = '0.0.1-beta-1'
-                    }
-        
-                    echo "New version: ${NEW_VERSION}"
+                    def latestVersion = getVersionFromGitHub()
+                    def newVersion = incrementVersion(latestVersion)
+                    env.NEW_VERSION = newVersion
                 }
             }
         }
-        
+
         stage('Commit and Push') {
             steps {
                 script {
-                    // Check if there are changes to commit
-                    def hasChanges = sh(script: 'git diff --exit-code', returnStatus: true) == 1
-        
-                    if (hasChanges) {
-                        withCredentials([usernamePassword(credentialsId: 'github_key', passwordVariable: 'Github_Password', usernameVariable: 'Github_Username')]) {
-                            // Commit and push only if there are changes
-                            sh 'git checkout develop'
-                            sh "git commit -am 'Bump version to ${NEW_VERSION}'"
-                            sh "git tag ${NEW_VERSION}"
-                            sh "git push https://${Github_Username}:${Github_Password}@github.com/${Github_Username}/Java_Project.git develop --tags"
-                        }
-                    } else {
-                        echo "No changes to commit. Skipping commit and push steps."
-                    }
+                    def version = env.NEW_VERSION
+                    commitAndPush(version)
                 }
             }
         }
@@ -163,4 +130,63 @@ pipeline {
     //     }
     // }
 
+}
+def getVersionFromGitHub() {
+    def version
+    try {
+        // Clone the repository to get the latest version
+        checkout([$class: 'Git', branches: [[name: '*/develop']], credentialsId: env.GIT_CREDENTIALS_ID, url: env.GIT_REPO_URL])
+        
+        // Extract the latest version from the repository (replace this with your logic)
+        version = sh(script: 'git describe --tags --abbrev=0', returnStdout: true).trim()
+    } finally {
+        // Clean up by deleting the cloned repository
+        deleteDir()
+    }
+
+    return version ?: '0.0.0-beta'
+}
+
+def incrementVersion(currentVersion) {
+    def versionParts = currentVersion.split('-')
+    def versionNumbers = versionParts[0].split('\\.')
+
+    // Increment the last part of the version number
+    int lastPart = versionNumbers[2].toInteger() + 1
+
+    // Check if the last part exceeds 9
+    if (lastPart > 9) {
+        // Increment the second part and reset the last part to 0
+        versionNumbers[1] = (versionNumbers[1].toInteger() + 1).toString()
+        lastPart = 0
+    }
+
+    // Update the version
+    versionNumbers[2] = lastPart.toString()
+
+    // Join the version parts back
+    def newVersion = versionNumbers.join('.')
+    newVersion += "-${versionParts[1]}"
+
+    return newVersion
+}
+
+def commitAndPush(version) {
+    // Configure Git credentials
+    withCredentials([usernamePassword(credentialsId: env.GIT_CREDENTIALS_ID, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+        // Set up Git configuration
+        sh "git config --global user.email 'eng.amrashraf3@gmail.com'"
+        sh "git config --global user.name 'amrashraf-web'"
+
+        // Clone the repository again
+        checkout([$class: 'Git', branches: [[name: '*/develop']], credentialsId: env.GIT_CREDENTIALS_ID, url: env.GIT_REPO_URL])
+
+        // Make changes and commit
+        sh "echo 'Version ${version}' > version.txt"
+        sh 'git add .'
+        sh "git commit -m 'Bump version to ${version}'"
+
+        // Push the changes
+        sh "git push origin develop"
+    }
 }
