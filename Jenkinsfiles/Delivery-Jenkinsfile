@@ -37,6 +37,8 @@ pipeline {
         stage('Get Latest Version') {
             steps {
                 script {
+                    VERSION=$(git describe --tags --match '0.*' | sed -e 's/^v//; s/-beta$//; s/^/0./; s/\.[0-9]*$/-beta/')
+                    echo $VERSION
                     // Check if any tags exist
                     def tagList = sh(script: 'git tag -l', returnStdout: true).trim()
 
