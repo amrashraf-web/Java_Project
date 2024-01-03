@@ -38,16 +38,27 @@ pipeline {
         stage('Get Latest Version') {
             steps {
                 script {
-                    def currentVersion = sh(script: 'git describe --tags --abbrev=0', returnStdout: true, returnStatus: true)
+                    def currentVersion = sh(script: 'git describe --tags --abbrev=0', returnStdout: true, returnStatus: true).trim()
         
-                    if (currentVersion != 0) {
+                    if (currentVersion.empty) {
                         // No tags found, create a new version
                         currentVersion = '0.0.1-beta'
                     } else {
                         // Increment the last part of the version
-                        def versionParts = currentVersion.trim().split('-')
-                        def lastPart = versionParts[1].toInteger() + 1
-                        currentVersion = "${versionParts[0]}-${lastPart}"
+                        def versionParts = currentVersion.split('-')
+        
+                        if (versionParts.size() == 1) {
+                            // Version has no hyphen, consider it as the last part
+                            def lastPart = versionParts[0].toInteger() + 1
+                            currentVersion = "${lastPart}"
+                        } else if (versionParts.size() == 2) {
+                            // Version has a hyphen, increment the last part
+                            def lastPart = versionParts[1].toInteger() + 1
+                            currentVersion = "${versionParts[0]}-${lastPart}"
+                        } else {
+                            // Unexpected version format, handle accordingly
+                            error("Unexpected version format: ${currentVersion}")
+                        }
                     }
         
                     // Set the version as an environment variable
@@ -55,6 +66,7 @@ pipeline {
                 }
             }
         }
+
 
 
 
