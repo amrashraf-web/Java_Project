@@ -72,7 +72,7 @@ pipeline {
 
         stage('Commit and Push') {
             when {
-                expression { env.NEW_VERSION != sh(script: 'git describe --abbrev=0 --tags', returnStdout: true).trim() }
+                expression { env.NEW_VERSION != '0.0.0-beta' }
             }
             steps {
                 script {
