@@ -70,6 +70,9 @@ pipeline {
         stage('Commit and Push') {
             steps {
                 script {
+                    // Checkout the 'develop' branch explicitly
+                    sh 'git checkout develop'
+        
                     // Check if there are changes to commit
                     def lastCommitHash = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
                     def currentCommitHash = sh(script: 'git rev-parse develop', returnStdout: true).trim()
@@ -77,7 +80,6 @@ pipeline {
                     if (lastCommitHash != currentCommitHash) {
                         withCredentials([usernamePassword(credentialsId: 'github_key', passwordVariable: 'Github_Password', usernameVariable: 'Github_Username')]) {
                             // Commit and push only if there are changes
-                            sh 'git checkout develop'
                             sh "git commit -am 'Bump version to ${NEW_VERSION}'"
                             sh "git tag ${NEW_VERSION}"
                             sh "git push https://${Github_Username}:${Github_Password}@github.com/${Github_Username}/Java_Project.git develop --tags"
