@@ -9,8 +9,6 @@ pipeline {
         BETA_VERSION_FILE = "${HOME}/beta_version.txt"
         nexus_url = 'amrashraf.com:8082'
         VERSION_FILE = 'version.txt'
-        GIT_REPO_URL = 'https://github.com/amrashraf-web/Java_Project.git'
-        GIT_CREDENTIALS_ID = 'github_key'
     }
                         
     stages {
@@ -135,17 +133,9 @@ def getVersionFromGitHub() {
     def version
     try {
         // Clone the repository to get the latest version
-        def gitCredentialsId = 'github_key'
-        checkout([
-            $class: 'GitSCM',
-            branches: [[name: 'develop']],
-            userRemoteConfigs: [[
-                url: 'https://github.com/amrashraf-web/Java_Project.git',
-                credentialsId: gitCredentialsId
-            ]]
-        ])
+        checkout([$class: 'GitSCM', branches: [[name: 'refs/remotes/origin/develop']], credentialsId: env.GIT_CREDENTIALS_ID, url: env.GIT_REPO_URL])
         
-        // Extract the latest version from the repository
+        // Extract the latest version from the repository or default to "0.0.1-beta-1"
         version = sh(script: 'git describe --tags --abbrev=0 || echo "0.0.1-beta-1"', returnStdout: true).trim()
     } finally {
         // Clean up by deleting the cloned repository
@@ -154,6 +144,7 @@ def getVersionFromGitHub() {
 
     return version
 }
+
 
 def incrementVersion(currentVersion) {
     def versionParts = currentVersion.split('-')
