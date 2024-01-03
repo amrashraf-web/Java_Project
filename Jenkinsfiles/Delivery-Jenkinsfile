@@ -80,8 +80,8 @@ pipeline {
         //             withCredentials([usernamePassword(credentialsId: 'github_key', passwordVariable: 'Nexus_Password', usernameVariable: 'Nexus_Username')]) {
                             // Commit and push only if the version has changed
                             sh 'git checkout develop'
-                            sh 'git config user.name "$Nexus_Username"'
-                            sh 'git config user.password "$Nexus_Password"'
+                            sh 'git config user.name "${Nexus_Username}"'
+                            sh 'git config user.password "{$Nexus_Password}"'
                             sh "git commit -am 'Bump version to ${NEW_VERSION}'"
                             sh "git tag ${NEW_VERSION}"
                             sh 'git push origin develop --tags'
