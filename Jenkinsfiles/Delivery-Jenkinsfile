@@ -145,14 +145,14 @@ def getVersionFromGitHub() {
             ]]
         ])
         
-        // Extract the latest version from the repository (replace this with your logic)
-        version = sh(script: 'git describe --tags --abbrev=0', returnStdout: true).trim()
+        // Extract the latest version from the repository
+        version = sh(script: 'git describe --tags --abbrev=0 || echo "0.0.1-beta-1"', returnStdout: true).trim()
     } finally {
         // Clean up by deleting the cloned repository
         deleteDir()
     }
 
-    return version ?: '0.0.0-beta'
+    return version
 }
 
 def incrementVersion(currentVersion) {
