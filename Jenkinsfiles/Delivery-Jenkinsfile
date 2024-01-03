@@ -37,41 +37,48 @@ pipeline {
         stage('Get Latest Version') {
             steps {
                 script {
-                    def currentVersion = sh(script: 'git describe --tags --abbrev=0', returnStdout: true, returnStatus: true).trim()
-        
-                    if (currentVersion.startsWith("fatal:")) {
-                        // Git describe command failed, set a default version
-                        currentVersion = '0.0.1-beta'
-                    } else if (currentVersion.empty) {
-                        // No tags found, set a default version
-                        currentVersion = '0.0.1-beta'
-                    } else {
-                        // Increment the last part of the version
-                        def versionParts = currentVersion.split('-')
-        
-                        if (versionParts.size() == 2 && versionParts[1].isInteger()) {
-                            // Version has a hyphen and the last part is an integer, increment it
-                            def lastPart = versionParts[1].toInteger() + 1
-                            currentVersion = "${versionParts[0]}-${lastPart}"
-                        } else {
-                            // Unexpected version format or last part is not an integer, handle accordingly
-                            error("Unexpected version format or non-integer last part: ${currentVersion}")
-                        }
+                    // Get the latest version from the GitHub repository
+                    def currentVersion = sh(script: 'git describe --abbrev=0 --tags', returnStdout: true).trim()
+
+                    if (currentVersion == '') {
+                        // If no tags found, set initial version
+                        currentVersion = '0.0.0-beta'
                     }
-        
-                    // Set the version as an environment variable
-                    env.NEW_VERSION = currentVersion.toString()
+
+                    // Split the version components
+                    def versionComponents = currentVersion.split('\\.')
+
+                    // Increment the last component
+                    def lastComponent = versionComponents[-1].toInteger() + 1
+
+                    // Check if it's time to increment the second component
+                    if (lastComponent > 9) {
+                        versionComponents[-1] = '0'
+                        versionComponents[-2] = (versionComponents[-2].toInteger() + 1).toString()
+                    } else {
+                        versionComponents[-1] = lastComponent.toString()
+                    }
+
+                    // Assemble the new version
+                    def newVersion = versionComponents.join('.')
+
+                    echo "New version: ${newVersion}"
+
+                    // Set the new version as an environment variable for later stages
+                    env.NEW_VERSION = newVersion
                 }
             }
         }
 
-
         stage('Commit and Push') {
             steps {
                 script {
-                    // Commit and push the new version
-                    sh "git commit -am 'Bump version to ${env.NEW_VERSION}'"
-                    sh "git tag ${env.NEW_VERSION}"
+                    // Commit and push the new version to the 'develop' branch
+                    sh 'git checkout develop'
+                    sh 'git config user.name "Your Name"'
+                    sh 'git config user.email "your.email@example.com"'
+                    sh 'git commit -am "Bump version to ${NEW_VERSION}"'
+                    sh 'git tag ${NEW_VERSION}'
                     sh 'git push origin develop --tags'
                 }
             }
