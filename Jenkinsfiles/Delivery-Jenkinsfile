@@ -187,7 +187,7 @@ def commitAndPush(version) {
         sh "git config --global user.name 'amrashraf-web'"
 
         // Clone the repository again
-        checkout([$class: 'Git', branches: [[name: '*/develop']], credentialsId: env.GIT_CREDENTIALS_ID, url: env.GIT_REPO_URL])
+        checkout([$class: 'GitSCM', branches: [[name: '*/develop']], credentialsId: env.GIT_CREDENTIALS_ID, url: env.GIT_REPO_URL])
 
         // Make changes and commit
         sh "echo 'Version ${version}' > version.txt"
