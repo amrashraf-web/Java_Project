@@ -37,35 +37,35 @@ pipeline {
         stage('Get Latest Version') {
             steps {
                 script {
-                    // Get the latest version from the GitHub repository
-                    def currentVersion = sh(script: 'git describe --abbrev=0 --tags', returnStdout: true).trim()
+                    // Check if any tags exist
+                    def tagList = sh(script: 'git tag -l', returnStdout: true).trim()
 
-                    if (currentVersion == '') {
-                        // If no tags found, set initial version
-                        currentVersion = '0.0.0-beta'
-                    }
+                    if (tagList) {
+                        // Get the latest version from the GitHub repository
+                        def currentVersion = sh(script: 'git describe --abbrev=0 --tags', returnStdout: true).trim()
 
-                    // Split the version components
-                    def versionComponents = currentVersion.split('\\.')
+                        // Split the version components
+                        def versionComponents = currentVersion.split('\\.')
 
-                    // Increment the last component
-                    def lastComponent = versionComponents[-1].toInteger() + 1
+                        // Increment the last component
+                        def lastComponent = versionComponents[-1].toInteger() + 1
 
-                    // Check if it's time to increment the second component
-                    if (lastComponent > 9) {
-                        versionComponents[-1] = '0'
-                        versionComponents[-2] = (versionComponents[-2].toInteger() + 1).toString()
+                        // Check if it's time to increment the second component
+                        if (lastComponent > 9) {
+                            versionComponents[-1] = '0'
+                            versionComponents[-2] = (versionComponents[-2].toInteger() + 1).toString()
+                        } else {
+                            versionComponents[-1] = lastComponent.toString()
+                        }
+
+                        // Assemble the new version
+                        env.NEW_VERSION = versionComponents.join('.')
                     } else {
-                        versionComponents[-1] = lastComponent.toString()
+                        // If no tags found, set initial version
+                        env.NEW_VERSION = '0.0.0-beta'
                     }
 
-                    // Assemble the new version
-                    def newVersion = versionComponents.join('.')
-
-                    echo "New version: ${newVersion}"
-
-                    // Set the new version as an environment variable for later stages
-                    env.NEW_VERSION = newVersion
+                    echo "New version: ${NEW_VERSION}"
                 }
             }
         }
