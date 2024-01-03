@@ -51,7 +51,7 @@ pipeline {
         
                         if (versionParts.size() == 2 && versionParts[1].isInteger()) {
                             // Version has a hyphen and the last part is an integer, increment it
-                            def lastPart = versionParts[1].toInteger() + 1
+                            def lastPart = versionParts[1] as Integer + 1
                             currentVersion = "${versionParts[0]}-${lastPart}"
                         } else {
                             // Unexpected version format or last part is not an integer, handle accordingly
