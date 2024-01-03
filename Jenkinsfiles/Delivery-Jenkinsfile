@@ -74,6 +74,9 @@ pipeline {
                     sh 'git checkout develop'
         
                     // Check if there are changes to commit
+                    echo 'Current workspace status:'
+                    sh 'git status'
+        
                     def lastCommitHash = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
                     def currentCommitHash = sh(script: 'git rev-parse develop', returnStdout: true).trim()
         
@@ -90,6 +93,7 @@ pipeline {
                 }
             }
         }
+
 
         // stage('Build and Test') {
         //     steps {
