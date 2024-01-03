@@ -66,22 +66,27 @@ pipeline {
                 }
             }
         }
-
-
+        
         stage('Commit and Push') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'github_key', passwordVariable: 'Github_Password', usernameVariable: 'Github_Username')]) {
-                        // Commit and push only if the version has changed
-                        sh 'git checkout develop'
-                        sh "git commit -am 'Bump version to ${NEW_VERSION}'"
-                        sh "git tag ${NEW_VERSION}"
-                        sh "git push https://${Github_Username}:${Github_Password}@github.com/${Github_Username}/Java_Project.git develop --tags"
+                    // Check if there are changes to commit
+                    def hasChanges = sh(script: 'git status --porcelain', returnStatus: true) == 0
+        
+                    if (hasChanges) {
+                        withCredentials([usernamePassword(credentialsId: 'github_key', passwordVariable: 'Github_Password', usernameVariable: 'Github_Username')]) {
+                            // Commit and push only if there are changes
+                            sh 'git checkout develop'
+                            sh "git commit -am 'Bump version to ${NEW_VERSION}'"
+                            sh "git tag ${NEW_VERSION}"
+                            sh "git push https://${Github_Username}:${Github_Password}@github.com/${Github_Username}/Java_Project.git develop --tags"
+                        }
+                    } else {
+                        echo "No changes to commit. Skipping commit and push steps."
                     }
                 }
             }
         }
-
 
 
         // stage('Build and Test') {
