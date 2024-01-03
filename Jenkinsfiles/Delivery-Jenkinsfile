@@ -71,9 +71,12 @@ pipeline {
         }
 
         stage('Commit and Push') {
+            when {
+                expression { env.NEW_VERSION != sh(script: 'git describe --abbrev=0 --tags', returnStdout: true).trim() }
+            }
             steps {
                 script {
-                    // Commit and push the new version to the 'develop' branch
+                    // Commit and push only if the version has changed
                     sh 'git checkout develop'
                     sh 'git config user.name "amrashraf-web"'
                     sh 'git config user.email "eng.amrashraf3@gmail.com"'
@@ -83,6 +86,7 @@ pipeline {
                 }
             }
         }
+
 
         // stage('Build and Test') {
         //     steps {
