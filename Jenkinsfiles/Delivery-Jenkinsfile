@@ -75,9 +75,6 @@ pipeline {
         }
 
         stage('Commit and Push') {
-            when {
-                expression { env.NEW_VERSION != '0.0.0-beta' }
-            }
             steps {
                 script {
                     // Commit and push only if the version has changed
