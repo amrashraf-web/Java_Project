@@ -47,17 +47,13 @@ pipeline {
                         // Increment the last part of the version
                         def versionParts = currentVersion.split('-')
         
-                        if (versionParts.size() == 1) {
-                            // Version has no hyphen, consider it as the last part
-                            def lastPart = versionParts[0].toInteger() + 1
-                            currentVersion = "${lastPart}"
-                        } else if (versionParts.size() == 2) {
-                            // Version has a hyphen, increment the last part
+                        if (versionParts.size() == 2 && versionParts[1].isInteger()) {
+                            // Version has a hyphen and the last part is an integer, increment it
                             def lastPart = versionParts[1].toInteger() + 1
                             currentVersion = "${versionParts[0]}-${lastPart}"
                         } else {
-                            // Unexpected version format, handle accordingly
-                            error("Unexpected version format: ${currentVersion}")
+                            // Unexpected version format or last part is not an integer, handle accordingly
+                            error("Unexpected version format or non-integer last part: ${currentVersion}")
                         }
                     }
         
@@ -66,10 +62,6 @@ pipeline {
                 }
             }
         }
-
-
-
-
 
         stage('Commit and Push') {
             steps {
