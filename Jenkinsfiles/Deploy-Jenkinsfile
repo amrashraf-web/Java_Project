@@ -17,9 +17,9 @@ pipeline {
             steps {
                 script {
                     def GITHUB_API_REPO_URL = "${DEFAULT_GITHUB_API_BASE_URL}${GITHUB_REPO}"
-                    def AUTH = withCredentials([usernamePassword(credentialsId: GITHUB_CREDENTIALS_ID, usernameVariable: USERNAME, passwordVariable: PASSWORD)]) {
-                        if (env.GITHUB_TOKEN) {
-                            ['-H', "Authorization: token ${env.GITHUB_TOKEN}"]
+                    def AUTH = withCredentials([usernamePassword(credentialsId: GITHUB_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        if (env.PASSWORD) {
+                            ['-H', "Authorization: token ${env.PASSWORD}"]
                         } else {
                             ['--user', "${env.USERNAME}:${env.PASSWORD}"]
                         }
@@ -32,7 +32,7 @@ pipeline {
                     }
                     echo "Derived GITHUB_API_REPO_URL is: ${GITHUB_API_REPO_URL}"
 
-                    if (!env.GITHUB_TOKEN && (!env.USERNAME || !env.PASSWORD)) {
+                    if (!env.PASSWORD && (!env.USERNAME || !env.PASSWORD)) {
                         error "Error! GITHUB_TOKEN OR (GITHUB_USERNAME And GITHUB_PASSWORD) is required for this script"
                     }
 
@@ -40,7 +40,7 @@ pipeline {
                         error "Error! GITHUB_API_REPO_URL is required for this script"
                     }
 
-                    if (!env.GITHUB_TOKEN) {
+                    if (!env.PASSWORD) {
                         echo "GITHUB_TOKEN (OAuth Token) is not supplied (Preferred Auth). Falling back to BasicAuth with GITHUB_USERNAME and GITHUB_PASSWORD"
                     }
 
