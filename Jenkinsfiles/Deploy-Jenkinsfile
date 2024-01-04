@@ -24,15 +24,6 @@ pipeline {
         stage('Create New Version Tag') {
             steps {
                 script {
-                    def gitCredentialsId = 'github_key'
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: [[name: 'develop']],
-                        userRemoteConfigs: [[
-                            url: 'https://github.com/amrashraf-web/Java_Project.git',
-                            credentialsId: gitCredentialsId
-                        ]]
-                    ])
                     def version = generateNextBetaVersion('0.0.1-beta')
                     
                     if (!tagExists(version)) {
@@ -48,15 +39,6 @@ pipeline {
         stage('List All Tag Versions') {
             steps {
                 script {
-                    def gitCredentialsId = 'github_key'
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: [[name: 'develop']],
-                        userRemoteConfigs: [[
-                            url: 'https://github.com/amrashraf-web/Java_Project.git',
-                            credentialsId: gitCredentialsId
-                        ]]
-                    ])
                     sh "git fetch --tags"
                     sh "git tag -l"
                 }
@@ -66,15 +48,6 @@ pipeline {
         stage('Create Auto Increment Tag') {
             steps {
                 script {
-                    def gitCredentialsId = 'github_key'
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: [[name: 'develop']],
-                        userRemoteConfigs: [[
-                            url: 'https://github.com/amrashraf-web/Java_Project.git',
-                            credentialsId: gitCredentialsId
-                        ]]
-                    ])
                     def lastBetaTag = sh(script: 'git describe --abbrev=0 --tags 2>/dev/null | grep "0.0.1-beta"', returnStdout: true).trim()
                     
                     if (lastBetaTag) {
