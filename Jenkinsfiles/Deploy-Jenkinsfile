@@ -35,7 +35,7 @@ pipeline {
                             git tag -a $NEW_TAG -m "Incrementing version number to $NEW_TAG"
                             
                             # push the new tag to GitHub
-                            git push origin $NEW_TAG
+                            git push origin :refs/tags/$NEW_TAG
                         else
                             echo "Tag $NEW_TAG already exists"
                         fi
