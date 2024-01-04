@@ -6,7 +6,6 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'github_key', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                     sh '''#!/bin/bash
-                        git remote set-url origin https://$GIT_USERNAME:$GIT_PASSWORD@github.com/amrashraf-web/Java_Project.git
                         git checkout develop
                         git pull origin develop
                         # get the latest version tag
@@ -44,6 +43,7 @@ pipeline {
                             git push origin $NEW_TAG:develop
                         fi
                     '''
+                    sh 'git remote set-url origin https://$GIT_USERNAME:$GIT_PASSWORD@github.com/amrashraf-web/Java_Project.git'
                 }
             }
         }
