@@ -35,13 +35,14 @@ pipeline {
                             git tag -a $NEW_TAG -m "Incrementing version number to $NEW_TAG"
                             
                             # add the new tag to the remote repository
+                            git remote set-url origin https://$GIT_USERNAME:$GIT_PASSWORD@github.com/amrashraf-web/Java_Project.git
                             git push origin $NEW_TAG
                         else
                             echo "Tag $NEW_TAG already exists"
+                            git remote set-url origin https://$GIT_USERNAME:$GIT_PASSWORD@github.com/amrashraf-web/Java_Project.git
                             git push origin $NEW_TAG
                         fi
                     '''
-                    sh 'git remote set-url origin https://$GIT_USERNAME:$GIT_PASSWORD@github.com/amrashraf-web/Java_Project.git'
                 }
             }
         }
