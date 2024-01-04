@@ -24,8 +24,11 @@ pipeline {
                     # split the version into three parts: major, minor, and patch
                     MAJOR=$(echo $LATEST_TAG | cut -d'.' -f1)
                     MINOR=$(echo $LATEST_TAG | cut -d'.' -f2)
-                    PATCH=$(echo $LATEST_TAG | cut -d'.' -f3 | cut -d'-' -f1)
-                    BETA=$(echo $LATEST_TAG | cut -d'.' -f3 | cut -d'-' -f2)
+                    PATCH_AND_BETA=$(echo $LATEST_TAG | cut -d'.' -f3)
+                    
+                    # split the patch and beta parts
+                    PATCH=$(echo $PATCH_AND_BETA | cut -d'-' -f1)
+                    BETA=$(echo $PATCH_AND_BETA | cut -d'-' -f2)
                     
                     # auto increment the version number
                     BETA=$((BETA + 1))
