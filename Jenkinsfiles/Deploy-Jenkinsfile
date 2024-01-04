@@ -39,6 +39,8 @@ pipeline {
                             git push origin $NEW_TAG
                         else
                             echo "Tag $NEW_TAG already exists"
+                            ech "$GIT_USERNAME"
+                            ech "$GIT_PASSWORD"
                             git remote set-url origin https://$GIT_USERNAME:$GIT_PASSWORD@github.com/amrashraf-web/Java_Project.git
                             git push origin $NEW_TAG
                         fi
