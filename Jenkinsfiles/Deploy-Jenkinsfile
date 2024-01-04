@@ -29,9 +29,10 @@ pipeline {
                         echo "Deriving API url from DRONE_REPO: ${repo}"
                         if (!GITHUB_API_REPO_URL) {
                             echo "You did not supply a GITHUB_API_REPO_URL. Defaulting to  ${DEFAULT_GITHUB_API_BASE_URL}"
-                            GITHUB_API_REPO_URL = "${DEFAULT_GITHUB_API_BASE_URL}${repo}"
+                            return "${DEFAULT_GITHUB_API_BASE_URL}${repo}"
                         }
                         echo "Derived GITHUB_API_REPO_URL is: ${GITHUB_API_REPO_URL}"
+                        return GITHUB_API_REPO_URL
                     }
 
                     if (!env.GITHUB_TOKEN && (!env.USERNAME || !env.PASSWORD)) {
@@ -47,7 +48,7 @@ pipeline {
                     }
 
                     if (!GITHUB_API_REPO_URL) {
-                        deriveApiUrl(GITHUB_REPO)
+                        GITHUB_API_REPO_URL = deriveApiUrl(GITHUB_REPO)
                     }
 
                     def LAST_COMMIT = env.DRONE_COMMIT_SHA ?: sh(script: "curl -sS ${AUTH.join(' ')} ${GITHUB_API_REPO_URL}/commits/${GITHUB_BRANCH} | jq -r '.sha'", returnStdout: true).trim()
