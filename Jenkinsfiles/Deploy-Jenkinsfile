@@ -48,6 +48,8 @@ pipeline {
         stage('Create Auto Increment Tag') {
             steps {
                 script {
+                    
+                    // Your auto-incrementing logic goes here
                     def lastBetaTag = sh(script: 'git describe --abbrev=0 --tags 2>/dev/null | grep "0.0.1-beta"', returnStdout: true).trim()
                     
                     if (lastBetaTag) {
@@ -55,7 +57,12 @@ pipeline {
                         
                         if (!tagExists(version)) {
                             sh "git tag ${version}"
-                            sh "git push origin ${version}"
+                            try {
+                                sh "git push origin ${version}"
+                            } catch (Exception e) {
+                                // Handle push failure (e.g., tag already pushed by another build)
+                                echo "Failed to push tag '${version}' to origin. It may have already been pushed."
+                            }
                         } else {
                             echo "Tag '${version}' already exists."
                         }
@@ -65,7 +72,12 @@ pipeline {
                         def version = '0.0.1-beta-1'
                         
                         sh "git tag ${version}"
-                        sh "git push origin ${version}"
+                        try {
+                            sh "git push origin ${version}"
+                        } catch (Exception e) {
+                            // Handle push failure (e.g., tag already pushed by another build)
+                            echo "Failed to push tag '${version}' to origin. It may have already been pushed."
+                        }
                     }
                 }
             }
