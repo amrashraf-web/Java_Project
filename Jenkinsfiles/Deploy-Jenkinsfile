@@ -13,7 +13,7 @@ pipeline {
 
         stage('Get Latest Version and Increment') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'github-credentials', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                withCredentials([usernamePassword(credentialsId: 'github_key', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                     // Check if there are any tags
                     sh 'if [ "$(git tag)" = "" ]; then git tag 0.0.1-beta-1; fi'
 
