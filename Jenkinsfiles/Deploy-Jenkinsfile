@@ -32,9 +32,6 @@ pipeline {
                     }
                     echo "Derived GITHUB_API_REPO_URL is: ${GITHUB_API_REPO_URL}"
 
-                    if (!env.PASSWORD && (!env.USERNAME || !env.PASSWORD)) {
-                        error "Error! GITHUB_TOKEN OR (GITHUB_USERNAME And GITHUB_PASSWORD) is required for this script"
-                    }
 
                     if (!env.GITHUB_REPO || !GITHUB_API_REPO_URL) {
                         error "Error! GITHUB_API_REPO_URL is required for this script"
