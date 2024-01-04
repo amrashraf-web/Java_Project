@@ -53,7 +53,10 @@ pipeline {
     
     post {
         always {
-            // Cleanup or other post-build tasks
+            script {
+                sh 'echo "Done"'
+            }
+            
         }
     }
 }
