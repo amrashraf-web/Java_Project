@@ -37,13 +37,12 @@ pipeline {
                             git tag -a $NEW_TAG -m "Incrementing version number to $NEW_TAG"
                             
                             # push the new tag to GitHub
-                            git push -f https://$GIT_USERNAME:$GIT_PASSWORD@github.com/amrashraf-web/Java_Project.git $NEW_TAG
+                            git push -f https://$GIT_USERNAME:$GIT_PASSWORD@github.com/amrashraf-web/Java_Project.git $NEW_TAG:develop
                         else
                             echo "Tag $NEW_TAG already exists"
-                            git push -f https://$GIT_USERNAME:$GIT_PASSWORD@github.com/amrashraf-web/Java_Project.git $NEW_TAG
+                            git push -f https://$GIT_USERNAME:$GIT_PASSWORD@github.com/amrashraf-web/Java_Project.git $NEW_TAG:develop
                         fi
                     '''
-                    sh 'git remote set-url origin https://$GIT_USERNAME:$GIT_PASSWORD@github.com/amrashraf-web/Java_Project.git'
                 }
             }
         }
