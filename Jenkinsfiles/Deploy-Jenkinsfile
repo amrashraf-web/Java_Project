@@ -18,11 +18,7 @@ pipeline {
                 script {
                     def GITHUB_API_REPO_URL = "${DEFAULT_GITHUB_API_BASE_URL}${GITHUB_REPO}"
                     def AUTH = withCredentials([usernamePassword(credentialsId: GITHUB_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                        if (env.PASSWORD) {
-                            ['-H', "Authorization: token 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"]
-                        } else {
                             ['--user', "${env.USERNAME}:${env.PASSWORD}"]
-                        }
                     }
 
                     echo "Deriving API url from DRONE_REPO: ${GITHUB_REPO}"
