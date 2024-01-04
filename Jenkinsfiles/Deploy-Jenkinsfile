@@ -39,6 +39,15 @@ pipeline {
         
         stage('List All Tag Versions') {
             steps {
+                def gitCredentialsId = 'github_key'
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: 'develop']],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/amrashraf-web/Java_Project.git',
+                        credentialsId: gitCredentialsId
+                    ]]
+                ])
                 script {
                     sh "git fetch --tags"
                     sh "git tag -l"
