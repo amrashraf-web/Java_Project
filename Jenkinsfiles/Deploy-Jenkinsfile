@@ -49,48 +49,43 @@ pipeline {
         stage('Create Auto Increment Tag') {
             steps {
                 script {
+                    // Your auto-incrementing logic goes here
                     def lastBetaTag = sh(script: 'git describe --abbrev=0 --tags 2>/dev/null | grep "0.0.1-beta"', returnStdout: true).trim()
                     
-                    if (lastBetaTag) {
-                        def version = generateNextBetaVersion(lastBetaTag)
-                        
-                        versionLock.lock() // Acquire the lock
-                        
-                        try {
+                    versionLock.lock() // Acquire the lock
+                    
+                    try {
+                        if (lastBetaTag) {
+                            def version = generateNextBetaVersion(lastBetaTag)
+                            
+                            // Checkout the 'develop' branch
+                            sh 'git checkout develop'
+                            
+                            // Create and push the tag
                             if (!tagExists(version)) {
-                                // Checkout the 'develop' branch
-                                sh 'git checkout develop'
-                                
-                                // Create and push the tag
                                 sh "git tag ${version}"
                                 sh "git push origin ${version}"
                             } else {
                                 echo "Tag '${version}' already exists."
                             }
-                        } finally {
-                            versionLock.unlock() // Release the lock
-                        }
-                    } else {
-                        echo "No beta tags found. Assuming initial version."
-                        // You can set a default version or take other appropriate action
-                        def version = '0.0.1-beta-1'
-                        
-                        versionLock.lock() // Acquire the lock
-                        
-                        try {
+                        } else {
+                            echo "No beta tags found. Assuming initial version."
+                            // You can set a default version or take other appropriate action
+                            def version = '0.0.1-beta-1'
+                            
+                            // Checkout the 'develop' branch
+                            sh 'git checkout develop'
+                            
+                            // Create and push the tag
                             if (!tagExists(version)) {
-                                // Checkout the 'develop' branch
-                                sh 'git checkout develop'
-                                
-                                // Create and push the tag
                                 sh "git tag ${version}"
                                 sh "git push origin ${version}"
                             } else {
                                 echo "Tag '${version}' already exists."
                             }
-                        } finally {
-                            versionLock.unlock() // Release the lock
                         }
+                    } finally {
+                        versionLock.unlock() // Release the lock
                     }
                 }
             }
