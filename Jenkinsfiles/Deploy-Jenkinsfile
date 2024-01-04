@@ -22,8 +22,12 @@ pipeline {
                     // Your versioning logic goes here
                     def version = generateNextBetaVersion('0.0.1-beta')
                     
-                    sh "git tag ${version}"
-                    sh "git push origin ${version}"
+                    if (!tagExists(version)) {
+                        sh "git tag ${version}"
+                        sh "git push origin ${version}"
+                    } else {
+                        echo "Tag '${version}' already exists."
+                    }
                 }
             }
         }
@@ -44,8 +48,12 @@ pipeline {
                     def lastBetaTag = sh(script: 'git describe --abbrev=0 --tags | grep "0.0.1-beta"', returnStdout: true).trim()
                     def version = generateNextBetaVersion(lastBetaTag)
                     
-                    sh "git tag ${version}"
-                    sh "git push origin ${version}"
+                    if (!tagExists(version)) {
+                        sh "git tag ${version}"
+                        sh "git push origin ${version}"
+                    } else {
+                        echo "Tag '${version}' already exists."
+                    }
                 }
             }
         }
@@ -53,10 +61,7 @@ pipeline {
     
     post {
         always {
-            script {
-                sh 'echo "Done"'
-            }
-            
+            // Cleanup or other post-build tasks
         }
     }
 }
@@ -75,4 +80,8 @@ def generateNextBetaVersion(baseVersion) {
         // If the regular expression doesn't match, return a default value
         return "${baseVersion}-1"
     }
+}
+
+def tagExists(tag) {
+    return sh(script: "git tag -l ${tag}", returnStatus: true) == 0
 }
