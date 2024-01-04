@@ -7,7 +7,7 @@ pipeline {
         DEFAULT_TAG_PREFIX = 'v'
         GITHUB_CREDENTIALS_ID = 'github_key'
         BRANCH_NAME = 'Develop'
-        JQ_PATH = '/usr/bin/jq'
+        JQ_PATH = '/usr/bin/jq' // Provide the absolute path to the jq executable
     }
 
     stages {
@@ -27,7 +27,7 @@ pipeline {
 
                         // Get the last tag
                         def LAST_TAG = sh(script: """
-                            curl -sS --user ${GITHUB_TOKEN} ${GITHUB_API_REPO_URL}/tags | ${JQ_PATH} -r '.[].name' | grep -m 1 ${TAG_PREFIX}
+                            curl -sS --user ${GITHUB_TOKEN} "${GITHUB_API_REPO_URL}/tags" | ${JQ_PATH} -r '.[].name' | grep -m 1 ${TAG_PREFIX}
                         """, returnStdout: true).trim()
 
                         echo "Last Tag: ${LAST_TAG}"
