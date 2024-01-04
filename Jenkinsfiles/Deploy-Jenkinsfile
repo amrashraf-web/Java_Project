@@ -1,119 +1,39 @@
 pipeline {
     agent any
 
-    environment {
-        DEFAULT_NEW_PATCH_VERSION = '0.0.1'
-        DEFAULT_GITHUB_API_BASE_URL = 'https://api.github.com/repos/'
-        DEFAULT_TAG_PREFIX = 'v'
-        GITHUB_REPO = 'amrashraf-web/Java_Project'
-        GITHUB_BRANCH = 'Develop'
-        GITHUB_CREDENTIALS_ID = 'github_key'
-        TAG_PREFIX = 'v'
-        MODE = 'WRITE' // Change this to 'READONLY' if you only want to read the new tag without pushing it
-    }
-
     stages {
-        stage('Increment Version and Tag') {
-            steps {
-                script {
-                    def GITHUB_API_REPO_URL = "${DEFAULT_GITHUB_API_BASE_URL}${GITHUB_REPO}"
-                    def AUTH = withCredentials([usernamePassword(credentialsId: GITHUB_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                            ['--user', "${env.USERNAME}:${env.PASSWORD}"]
-                    }
+        stage('Checkout') {
+            git branch: 'develop',
+                credentialsId: 'github_key',
+                url: 'https://github.com/amrashraf-web/Java_Project.git'
+        }
 
-                    echo "Deriving API url from DRONE_REPO: ${GITHUB_REPO}"
-                    if (!GITHUB_API_REPO_URL) {
-                        echo "You did not supply a GITHUB_API_REPO_URL. Defaulting to  ${DEFAULT_GITHUB_API_BASE_URL}"
-                        GITHUB_API_REPO_URL = "${DEFAULT_GITHUB_API_BASE_URL}${GITHUB_REPO}"
-                    }
-                    echo "Derived GITHUB_API_REPO_URL is: ${GITHUB_API_REPO_URL}"
-
-
-                    if (!env.GITHUB_REPO || !GITHUB_API_REPO_URL) {
-                        error "Error! GITHUB_API_REPO_URL is required for this script"
-                    }
-
-                    if (!env.PASSWORD) {
-                        echo "GITHUB_TOKEN (OAuth Token) is not supplied (Preferred Auth). Falling back to BasicAuth with GITHUB_USERNAME and GITHUB_PASSWORD"
-                    }
-
-                    if (!GITHUB_API_REPO_URL) {
-                        GITHUB_API_REPO_URL = deriveApiUrl(GITHUB_REPO)
-                    }
-
-                    def LAST_COMMIT = env.DRONE_COMMIT_SHA ?: sh(script: "curl -sS ${AUTH.join(' ')} ${GITHUB_API_REPO_URL}/commits/${GITHUB_BRANCH} | jq -r '.sha'", returnStdout: true).trim()
-                    echo "Last Commit: ${LAST_COMMIT}"
-
-                    def LAST_TAG = sh(script: "curl -sS ${AUTH.join(' ')} ${GITHUB_API_REPO_URL}/tags | jq -r '.[].name' | sort -V | tail -n 1", returnStdout: true).trim()
-                    echo "Last Tag: ${LAST_TAG}"
-
-                    def NEW_PATCH_VERSION
-                    def NEW_TAG
-
-                    if (fileExists('.tags')) {
-                        NEW_TAG = readFile('.tags').trim()
-                        echo ".tags file exists, Reads from the File: ${NEW_TAG}"
-                        if (!NEW_TAG.startsWith(TAG_PREFIX)) {
-                            echo "Tag read from the .tags file doesn't have the prefix. Prepending Prefix"
-                            NEW_TAG = "${TAG_PREFIX}${NEW_TAG}"
-                        }
-                    } else {
-                        if (!LAST_TAG) {
-                            echo "No previous tags found with prefix: ${TAG_PREFIX}... Defaulting to ${DEFAULT_NEW_PATCH_VERSION}"
-                            NEW_PATCH_VERSION = DEFAULT_NEW_PATCH_VERSION
-                            NEW_TAG = "${TAG_PREFIX}${NEW_PATCH_VERSION}"
-                        } else {
-                            echo "Bumping the version"
-                            NEW_PATCH_VERSION = LAST_TAG.tokenize('.')[3].toInteger() + 1
-                            NEW_TAG = "${LAST_TAG.tokenize('.')[0..2].join('.')}.${NEW_PATCH_VERSION}"
-
-                            if (!NEW_TAG) {
-                                error "Error! Non parse-able Previous Tag ${LAST_TAG}"
-                            }
-                        }
-                    }
-
-                    if (!NEW_TAG) {
-                        error "Error! Derived new-tag is empty. Exiting."
-                    }
-
-                    echo "New Tag in Draft: ${NEW_TAG}"
-
-                    if (env.STRIP_PREFIX == 'true') {
-                        echo "Removing prefix from the tag"
-                        NEW_TAG = NEW_TAG - TAG_PREFIX
-                    }
-
-                    if (MODE == 'READONLY') {
-                        echo "Read-only Mode. Please check the tagging result."
-                    } else {
-                        echo "Writing to .tags file"
-                        writeFile(file: '.tags', text: NEW_TAG)
-
-                        if (MODE == 'WRITE') {
-                            echo "Tagging the remote repo"
-                            def response = sh(script: "curl -sS -X POST ${AUTH.join(' ')} --header 'Content-Type:application/json' --data '{\"tag\": \"${NEW_TAG}\",\"message\":\"Codecut occurs at ref=${LAST_COMMIT}\",\"type\":\"commit\",\"object\":\"${LAST_COMMIT}\"}' ${GITHUB_API_REPO_URL}/git/tags", returnStdout: true).trim()
-                            def NEW_TAG_SHA = response.sha
-                            echo "Commit Message: Codecut occurs at ref=${LAST_COMMIT}"
-                            echo "New Tag Sha: ${NEW_TAG_SHA}"
-
-                            if (!NEW_TAG_SHA || NEW_TAG_SHA == 'null') {
-                                error "Error! Something went wrong. Exiting."
-                                echo "Last API call response: ${response}"
-                            }
-
-                            response = sh(script: "curl -sS -X POST ${AUTH.join(' ')} --header 'Content-Type:application/json' --data '{\"ref\": \"refs/tags/${NEW_TAG}\",\"sha\":\"${NEW_TAG_SHA}\"}' ${GITHUB_API_REPO_URL}/git/refs", returnStdout: true).trim()
-                            def NEW_TAG_CREATED = response.ref
-                            echo "New Tag Created: ${NEW_TAG_CREATED}"
-
-                            if (!NEW_TAG_CREATED || NEW_TAG_CREATED == 'null') {
-                                error "Error! Something went wrong. Exiting."
-                                echo "Last API call response: ${response}"
-                            }
-                        }
-                    }
-                }
-            }
+        // Get latest version tag and auto increment the number
+        stage('Get Latest Version and Increment') {
+            sh '''
+                # get the latest version tag
+                LATEST_TAG=$(git describe --tags --abbrev=0 || echo '0.0.1-beta-1')
+                
+                # split the version into three parts: major, minor, and patch
+                MAJOR=$(echo $LATEST_TAG | cut -d'.' -f1)
+                MINOR=$(echo $LATEST_TAG | cut -d'.' -f2)
+                PATCH=$(echo $LATEST_TAG | cut -d'.' -f3 | cut -d'-' -f1)
+                BETA=$(echo $LATEST_TAG | cut -d'.' -f3 | cut -d'-' -f2)
+                
+                # auto increment the version number
+                BETA=$((BETA + 1))
+                NEW_TAG="$MAJOR.$MINOR.$PATCH-beta-$BETA"
+                
+                echo "Creating new tag: $NEW_TAG"
+                
+                # create the new tag
+                git tag $NEW_TAG
+                
+                # push the new tag to GitHub
+                git push origin $NEW_TAG
+            '''
         }
     }
 }
+
+
