@@ -1,112 +1,55 @@
-import jenkins.model.Jenkins
-import hudson.util.*;
-import java.util.concurrent.locks.ReentrantLock
-
-def versionLock = new ReentrantLock()
-
 pipeline {
-    agent any              
+    agent any
+
+    environment {
+        GIT_BRANCH = 'develop'
+        GITHUB_KEY_ID = 'github_key'
+    }
+
     stages {
         stage('Checkout') {
             steps {
                 script {
-                    def gitCredentialsId = 'github_key'
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: [[name: 'develop']],
-                        userRemoteConfigs: [[
-                            url: 'https://github.com/amrashraf-web/Java_Project.git',
-                            credentialsId: gitCredentialsId
-                        ]]
-                    ])
-
+                    checkout([$class: 'GitSCM',
+                              branches: [[name: "refs/heads/${GIT_BRANCH}"]],
+                              doGenerateSubmoduleConfigurations: false,
+                              extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: '']],
+                              submoduleCfg: [],
+                              userRemoteConfigs: [[credentialsId: GITHUB_KEY_ID, url: 'https://github.com/amrashraf-web/Java_Project.git']]])
                 }
             }
         }
-        stage('Create New Version Tag') {
+
+        stage('Versioning') {
             steps {
                 script {
-                    def version = generateNextBetaVersion('0.0.1-beta')
-                    
-                    if (!tagExists(version)) {
-                        sh "git tag ${version}"
-                        sh "git push origin ${version}"
-                    } else {
-                        echo "Tag '${version}' already exists."
-                    }
-                }
-            }
-        }
-        
-        stage('List All Tag Versions') {
-            steps {
-                script {
-                    sh "git fetch --tags"
-                    sh "git tag -l"
-                }
-            }
-        }
-            
-        stage('Create Auto Increment Tag') {
-            steps {
-                script {
-                    def lastBetaTag = sh(script: 'git describe --abbrev=0 --tags 2>/dev/null | grep "0.0.1-beta"', returnStdout: true).trim()
-                    
-                    versionLock.lock()
-                    
-                    try {
-                        if (lastBetaTag) {
-                            def version = generateNextBetaVersion(lastBetaTag)
-                            sh 'git checkout develop'
-                            if (!tagExists(version)) {
-                                sh "git tag ${version}"
-                                sh "git push origin ${version}"
-                            } else {
-                                echo "Tag '${version}' already exists."
-                            }
-                        } else {
-                            echo "No beta tags found. Assuming initial version."
-                            def version = '0.0.1-beta-1'
-                            sh 'git checkout develop'
-                            if (!tagExists(version)) {
-                                sh "git tag ${version}"
-                                sh "git push origin ${version}"
-                            } else {
-                                echo "Tag '${version}' already exists."
-                            }
-                        }
-                    } finally {
-                        versionLock.unlock()
-                    }
+                    // Get the current version
+                    def currentVersion = sh(script: 'git describe --tags --abbrev=0', returnStdout: true).trim()
+
+                    // Parse the version components
+                    def (major, minor, patch) = currentVersion.tokenize('.').collect { it.toInteger() }
+
+                    // Increment the patch version
+                    patch += 1
+
+                    // Create the new version
+                    def newVersion = "${major}.${minor}.${patch}"
+
+                    // Update the version in your source code or build file
+                    // This depends on your project structure and versioning strategy
+
+                    // Commit the version change
+                    sh "git commit -am 'Increment version to ${newVersion}'"
+
+                    // Tag the commit with the new version
+                    sh "git tag -a ${newVersion} -m 'Version ${newVersion}'"
+
+                    // Push the changes and tags back to the repository
+                    sh "git push origin ${GIT_BRANCH} --tags"
                 }
             }
         }
 
+        // Add other stages for your build, test, deploy, etc.
     }
-    
-    post {
-        always {
-            script {
-                sh 'echo "Done"'
-            }
-        }
-    }
-}
-
-
-
-def generateNextBetaVersion(baseVersion) {
-    def matcher = (baseVersion =~ /.*-(beta-(\d+))/)
-    
-    if (matcher.matches()) {
-        def lastBetaCount = matcher[0][2].toInteger()
-        def nextBetaCount = lastBetaCount + 1
-        return "${baseVersion}-${nextBetaCount}"
-    } else {
-        return "${baseVersion}-1"
-    }
-}
-
-def tagExists(tag) {
-    return sh(script: "git tag -l ${tag}", returnStatus: true) == 0
 }
