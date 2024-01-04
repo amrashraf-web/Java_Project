@@ -2,22 +2,52 @@ pipeline {
     agent any
 
     environment {
-        GIT_BRANCH = 'develop'
-        GITHUB_KEY_ID = 'github_key'
+        DEFAULT_NEW_PATCH_VERSION = '0.0.1'
+        DEFAULT_GITHUB_API_BASE_URL = 'https://api.github.com/repos/'
+        DEFAULT_TAG_PREFIX = 'v'
+        GITHUB_CREDENTIALS_ID = 'github_key'
+        BRANCH_NAME = 'Develop'
     }
 
     stages {
-        stage('Versioning') {
+        stage('Increment Version and Tag') {
             steps {
                 script {
-                    def hasTags = sh(script: 'git tag -l', returnStatus: true) == 0
-                    def currentVersion = hasTags ? sh(script: 'git describe --tags --abbrev=0', returnStdout: true).trim() : '0.1.0'
-                    def (major, minor, patch) = currentVersion.tokenize('.').collect { it.toInteger() }
-                    patch += 1
-                    def newVersion = "${major}.${minor}.${patch}"
-                    sh "git commit -am 'Increment version to ${newVersion}'"
-                    sh "git tag -a ${newVersion} -m 'Version ${newVersion}'"
-                    sh "git push origin ${GIT_BRANCH} --tags"
+                    // Set up GitHub credentials
+                    withCredentials([usernamePassword(credentialsId: GITHUB_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        def GITHUB_TOKEN = env.GITHUB_TOKEN ?: "${USERNAME}:${PASSWORD}"
+                        def GITHUB_API_BASE_URL = env.GITHUB_API_BASE_URL ?: DEFAULT_GITHUB_API_BASE_URL
+                        def TAG_PREFIX = env.TAG_PREFIX ?: DEFAULT_TAG_PREFIX
+                        def NEW_PATCH_VERSION = '0.0.1-beta'
+
+                        // Derive API URL
+                        def GITHUB_API_REPO_URL = "${GITHUB_API_BASE_URL}${env.JOB_NAME}"
+
+                        // Get the last tag
+                        def LAST_TAG = sh(script: """
+                            curl -sS --user ${GITHUB_TOKEN} ${GITHUB_API_REPO_URL}/tags | jq -r '.[].name' | grep -m 1 ${TAG_PREFIX}
+                        """, returnStdout: true).trim()
+
+                        echo "Last Tag: ${LAST_TAG}"
+
+                        // Increment version
+                        def NEW_TAG = LAST_TAG ? "${TAG_PREFIX}${NEW_PATCH_VERSION}-${LAST_TAG.split('-').last().toInteger() + 1}" : "${TAG_PREFIX}${NEW_PATCH_VERSION}-1"
+
+                        echo "New Tag in Draft: ${NEW_TAG}"
+
+                        // Execute the tagging
+                        sh(script: """
+                            curl -sS --user ${GITHUB_TOKEN} -X POST \
+                                --header "Content-Type:application/json" \
+                                --data '{"tag": "${NEW_TAG}","message":"Codecut occurs at ref=\${LAST_COMMIT}","type":"commit","object":"\${LAST_COMMIT}"}' \
+                                ${GITHUB_API_REPO_URL}/git/tags
+
+                            curl -sS --user ${GITHUB_TOKEN} -X POST \
+                                --header "Content-Type:application/json" \
+                                --data '{"ref": "refs/tags/${NEW_TAG}","sha":"\${NEW_TAG_SHA}"}' \
+                                ${GITHUB_API_REPO_URL}/git/refs
+                        """)
+                    }
                 }
             }
         }
