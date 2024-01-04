@@ -17,9 +17,7 @@ pipeline {
                         userRemoteConfigs: [[
                             url: 'https://github.com/amrashraf-web/Java_Project.git',
                             credentialsId: gitCredentialsId
-                        ]],
-                        extensions: [[$class: 'CleanBeforeCheckout']],
-                        gitTool: 'Default'
+                        ]]
                     ])
 
                 }
