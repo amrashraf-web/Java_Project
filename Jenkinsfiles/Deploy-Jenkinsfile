@@ -1,11 +1,12 @@
+import jenkins.model.Jenkins
+import hudson.util.*;
+import java.util.concurrent.locks.ReentrantLock
+
+def versionLock = new ReentrantLock()
+
 pipeline {
     agent any              
     stages {
-        stage('Reset Workspace') {
-            steps {
-                cleanWs()
-            }
-        }
         stage('Checkout') {
             steps {
                 script {
@@ -48,35 +49,40 @@ pipeline {
         stage('Create Auto Increment Tag') {
             steps {
                 script {
-                    
                     // Your auto-incrementing logic goes here
                     def lastBetaTag = sh(script: 'git describe --abbrev=0 --tags 2>/dev/null | grep "0.0.1-beta"', returnStdout: true).trim()
                     
                     if (lastBetaTag) {
                         def version = generateNextBetaVersion(lastBetaTag)
                         
-                        if (!tagExists(version)) {
-                            sh "git tag ${version}"
-                            try {
+                        versionLock.lock() // Acquire the lock
+                        
+                        try {
+                            if (!tagExists(version)) {
+                                sh "git tag ${version}"
                                 sh "git push origin ${version}"
-                            } catch (Exception e) {
-                                // Handle push failure (e.g., tag already pushed by another build)
-                                echo "Failed to push tag '${version}' to origin. It may have already been pushed."
+                            } else {
+                                echo "Tag '${version}' already exists."
                             }
-                        } else {
-                            echo "Tag '${version}' already exists."
+                        } finally {
+                            versionLock.unlock() // Release the lock
                         }
                     } else {
                         echo "No beta tags found. Assuming initial version."
                         // You can set a default version or take other appropriate action
                         def version = '0.0.1-beta-1'
                         
-                        sh "git tag ${version}"
+                        versionLock.lock() // Acquire the lock
+                        
                         try {
-                            sh "git push origin ${version}"
-                        } catch (Exception e) {
-                            // Handle push failure (e.g., tag already pushed by another build)
-                            echo "Failed to push tag '${version}' to origin. It may have already been pushed."
+                            if (!tagExists(version)) {
+                                sh "git tag ${version}"
+                                sh "git push origin ${version}"
+                            } else {
+                                echo "Tag '${version}' already exists."
+                            }
+                        } finally {
+                            versionLock.unlock() // Release the lock
                         }
                     }
                 }
