@@ -25,15 +25,12 @@ pipeline {
                         }
                     }
 
-                    def deriveApiUrl(repo) {
-                        echo "Deriving API url from DRONE_REPO: ${repo}"
-                        if (!GITHUB_API_REPO_URL) {
-                            echo "You did not supply a GITHUB_API_REPO_URL. Defaulting to  ${DEFAULT_GITHUB_API_BASE_URL}"
-                            return "${DEFAULT_GITHUB_API_BASE_URL}${repo}"
-                        }
-                        echo "Derived GITHUB_API_REPO_URL is: ${GITHUB_API_REPO_URL}"
-                        return GITHUB_API_REPO_URL
+                    echo "Deriving API url from DRONE_REPO: ${GITHUB_REPO}"
+                    if (!GITHUB_API_REPO_URL) {
+                        echo "You did not supply a GITHUB_API_REPO_URL. Defaulting to  ${DEFAULT_GITHUB_API_BASE_URL}"
+                        GITHUB_API_REPO_URL = "${DEFAULT_GITHUB_API_BASE_URL}${GITHUB_REPO}"
                     }
+                    echo "Derived GITHUB_API_REPO_URL is: ${GITHUB_API_REPO_URL}"
 
                     if (!env.GITHUB_TOKEN && (!env.USERNAME || !env.PASSWORD)) {
                         error "Error! GITHUB_TOKEN OR (GITHUB_USERNAME And GITHUB_PASSWORD) is required for this script"
