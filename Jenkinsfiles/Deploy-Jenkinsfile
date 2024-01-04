@@ -7,7 +7,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'github_key', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                     sh '''#!/bin/bash
                         # get the latest version tag
-                        LATEST_TAG=$(git describe --tags --abbrev=0 || echo '0.0.1-beta-1')
+                        LATEST_TAG=$(git describe --tags --abbrev=0 || echo '0.0.1-beta-0')
                         
                         # split the version into three parts: major, minor, and patch
                         MAJOR=$(echo $LATEST_TAG | cut -d'.' -f1)
@@ -34,14 +34,12 @@ pipeline {
                             # create the new tag
                             git tag -a $NEW_TAG -m "Incrementing version number to $NEW_TAG"
                             
-                            # push the new tag to GitHub
-                            git push origin :refs/tags/$NEW_TAG
+                            # add the new tag to the remote repository
+                            git push origin $NEW_TAG
                         else
                             echo "Tag $NEW_TAG already exists"
                         fi
                     '''
-                    
-                    // Added this line to set the new remote URL with credentials
                     sh 'git remote set-url origin https://$GIT_USERNAME:$GIT_PASSWORD@github.com/amrashraf-web/Java_Project.git'
                 }
             }
