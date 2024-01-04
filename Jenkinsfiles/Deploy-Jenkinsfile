@@ -19,6 +19,9 @@ pipeline {
         stage('Create New Version Tag') {
             steps {
                 script {
+                    // Checkout the 'develop' branch
+                    checkout scm
+                
                     // Your versioning logic goes here
                     def version = generateNextBetaVersion('0.0.1-beta')
                     
@@ -40,10 +43,13 @@ pipeline {
                 }
             }
         }
-        
+            
         stage('Create Auto Increment Tag') {
             steps {
                 script {
+                    // Checkout the 'develop' branch
+                    checkout scm
+                
                     // Your auto-incrementing logic goes here
                     def lastBetaTag = sh(script: 'git describe --abbrev=0 --tags | grep "0.0.1-beta"', returnStdout: true).trim()
                     def version = generateNextBetaVersion(lastBetaTag)
