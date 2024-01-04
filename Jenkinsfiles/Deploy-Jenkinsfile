@@ -75,9 +75,7 @@ pipeline {
                             credentialsId: gitCredentialsId
                         ]]
                     ])
-                    
-                    // Your auto-incrementing logic goes here
-                    def lastBetaTag = sh(script: 'git describe --abbrev=0 --tags | grep "0.0.1-beta"', returnStdout: true).trim()
+                    def lastBetaTag = sh(script: 'git describe --abbrev=0 --tags 2>/dev/null | grep "0.0.1-beta"', returnStdout: true).trim()
                     
                     if (lastBetaTag) {
                         def version = generateNextBetaVersion(lastBetaTag)
@@ -89,7 +87,12 @@ pipeline {
                             echo "Tag '${version}' already exists."
                         }
                     } else {
-                        echo "No beta tags found to auto-increment."
+                        echo "No beta tags found. Assuming initial version."
+                        // You can set a default version or take other appropriate action
+                        def version = '0.0.1-beta-1'
+                        
+                        sh "git tag ${version}"
+                        sh "git push origin ${version}"
                     }
                 }
             }
@@ -105,6 +108,8 @@ pipeline {
         }
     }
 }
+
+
 
 def generateNextBetaVersion(baseVersion) {
     def matcher = (baseVersion =~ /.*-(beta-(\d+))/)
