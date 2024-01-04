@@ -10,7 +10,8 @@ pipeline {
         stage('Versioning') {
             steps {
                 script {
-                    def currentVersion = sh(script: 'git describe --tags --abbrev=0', returnStdout: true).trim()
+                    def hasTags = sh(script: 'git tag -l', returnStatus: true) == 0
+                    def currentVersion = hasTags ? sh(script: 'git describe --tags --abbrev=0', returnStdout: true).trim() : '0.1.0'
                     def (major, minor, patch) = currentVersion.tokenize('.').collect { it.toInteger() }
                     patch += 1
                     def newVersion = "${major}.${minor}.${patch}"
