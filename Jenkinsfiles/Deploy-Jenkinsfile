@@ -13,40 +13,45 @@ pipeline {
 
         stage('Get Latest Version and Increment') {
             steps {
-                // Check if there are any tags
-                sh 'if [ "$(git tag)" = "" ]; then git tag 0.0.1-beta-1; fi'
+                withCredentials([usernamePassword(credentialsId: 'github-credentials', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                    // Check if there are any tags
+                    sh 'if [ "$(git tag)" = "" ]; then git tag 0.0.1-beta-1; fi'
 
-                // Get latest version tag and auto increment the number
-                sh '''
-                    # get the latest version tag
-                    LATEST_TAG=$(git describe --tags --abbrev=0 || echo '0.0.1-beta-1')
+                    // Get latest version tag and auto increment the number
+                    sh '''
+                        # get the latest version tag
+                        LATEST_TAG=$(git describe --tags --abbrev=0 || echo '0.0.1-beta-1')
+                        
+                        # split the version into three parts: major, minor, and patch
+                        MAJOR=$(echo $LATEST_TAG | cut -d'.' -f1)
+                        MINOR=$(echo $LATEST_TAG | cut -d'.' -f2)
+                        PATCH_AND_BETA=$(echo $LATEST_TAG | cut -d'.' -f3)
+                        
+                        # split the patch and beta parts
+                        PATCH=$(echo $PATCH_AND_BETA | cut -d'-' -f1)
+                        BETA=$(echo $PATCH_AND_BETA | cut -d'-' -f2)
+                        
+                        # check if the beta number is an integer
+                        if ! [[ $BETA =~ ^[0-9]+$ ]]; then
+                            BETA=1
+                        fi
+                        
+                        # auto increment the beta number
+                        BETA=$((BETA + 1))
+                        NEW_TAG="$MAJOR.$MINOR.$PATCH-beta-$BETA"
+                        
+                        echo "Creating new tag: $NEW_TAG"
+                        
+                        # create the new tag
+                        git tag $NEW_TAG
+                        
+                        # push the new tag to GitHub
+                        git push origin $NEW_TAG
+                    '''
                     
-                    # split the version into three parts: major, minor, and patch
-                    MAJOR=$(echo $LATEST_TAG | cut -d'.' -f1)
-                    MINOR=$(echo $LATEST_TAG | cut -d'.' -f2)
-                    PATCH_AND_BETA=$(echo $LATEST_TAG | cut -d'.' -f3)
-                    
-                    # split the patch and beta parts
-                    PATCH=$(echo $PATCH_AND_BETA | cut -d'-' -f1)
-                    BETA=$(echo $PATCH_AND_BETA | cut -d'-' -f2)
-                    
-                    # check if the beta number is an integer
-                    if ! [[ $BETA =~ ^[0-9]+$ ]]; then
-                        BETA=1
-                    fi
-                    
-                    # auto increment the beta number
-                    BETA=$((BETA + 1))
-                    NEW_TAG="$MAJOR.$MINOR.$PATCH-beta-$BETA"
-                    
-                    echo "Creating new tag: $NEW_TAG"
-                    
-                    # create the new tag
-                    git tag $NEW_TAG
-                    
-                    # push the new tag to GitHub
-                    git push origin $NEW_TAG
-                '''
+                    // Added this line to set the new remote URL with credentials
+                    sh 'git remote set-url origin https://$GIT_USERNAME:$GIT_PASSWORD@github.com/amrashraf-web/Java_Project.git'
+                }
             }
         }
     }
