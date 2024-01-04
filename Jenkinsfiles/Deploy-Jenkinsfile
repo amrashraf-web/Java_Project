@@ -13,6 +13,9 @@ pipeline {
 
         stage('Get Latest Version and Increment') {
             steps {
+                // Check if there are any tags
+                sh 'if [ "$(git tag)" = "" ]; then git tag 0.0.1-beta-1; fi'
+
                 // Get latest version tag and auto increment the number
                 sh '''
                     # get the latest version tag
