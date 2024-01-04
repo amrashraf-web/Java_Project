@@ -61,23 +61,21 @@ pipeline {
     
     post {
         always {
-            // Cleanup or other post-build tasks
+            script {
+                sh 'echo "Done"'
+            }
         }
     }
 }
 
 def generateNextBetaVersion(baseVersion) {
-    // Extract the beta count from the last tag
     def matcher = (baseVersion =~ /.*-(beta-(\d+))/)
     
     if (matcher.matches()) {
         def lastBetaCount = matcher[0][2].toInteger()
-        // Increment the beta count
         def nextBetaCount = lastBetaCount + 1
-        // Build the next beta version
         return "${baseVersion}-${nextBetaCount}"
     } else {
-        // If the regular expression doesn't match, return a default value
         return "${baseVersion}-1"
     }
 }
