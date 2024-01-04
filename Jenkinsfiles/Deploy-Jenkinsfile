@@ -10,33 +10,15 @@ pipeline {
         stage('Versioning') {
             steps {
                 script {
-                    // Get the current version
                     def currentVersion = sh(script: 'git describe --tags --abbrev=0', returnStdout: true).trim()
-
-                    // Parse the version components
                     def (major, minor, patch) = currentVersion.tokenize('.').collect { it.toInteger() }
-
-                    // Increment the patch version
                     patch += 1
-
-                    // Create the new version
                     def newVersion = "${major}.${minor}.${patch}"
-
-                    // Update the version in your source code or build file
-                    // This depends on your project structure and versioning strategy
-
-                    // Commit the version change
                     sh "git commit -am 'Increment version to ${newVersion}'"
-
-                    // Tag the commit with the new version
                     sh "git tag -a ${newVersion} -m 'Version ${newVersion}'"
-
-                    // Push the changes and tags back to the repository
                     sh "git push origin ${GIT_BRANCH} --tags"
                 }
             }
         }
-
-        // Add other stages for your build, test, deploy, etc.
     }
 }
