@@ -1,0 +1,70 @@
+pipeline {
+    agent any              
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    def gitCredentialsId = 'github_key'
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: 'develop']],
+                        userRemoteConfigs: [[
+                            url: 'https://github.com/amrashraf-web/Java_Project.git',
+                            credentialsId: gitCredentialsId
+                        ]]
+                    ])
+                }
+            }
+        }
+        stage('Create New Version Tag') {
+            steps {
+                script {
+                    // Your versioning logic goes here
+                    def version = generateNextBetaVersion('0.0.1-beta')
+                    
+                    sh "git tag ${version}"
+                    sh "git push origin ${version}"
+                }
+            }
+        }
+        
+        stage('List All Tag Versions') {
+            steps {
+                script {
+                    sh "git fetch --tags"
+                    sh "git tag -l"
+                }
+            }
+        }
+        
+        stage('Create Auto Increment Tag') {
+            steps {
+                script {
+                    // Your auto-incrementing logic goes here
+                    def lastBetaTag = sh(script: 'git describe --abbrev=0 --tags | grep "0.0.1-beta"', returnStdout: true).trim()
+                    def version = generateNextBetaVersion(lastBetaTag)
+                    
+                    sh "git tag ${version}"
+                    sh "git push origin ${version}"
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            // Cleanup or other post-build tasks
+        }
+    }
+}
+
+def generateNextBetaVersion(baseVersion) {
+    // Extract the beta count from the last tag
+    def lastBetaCount = (baseVersion =~ /.*-(\d+)$/).findAll()[0][1].toInteger()
+
+    // Increment the beta count
+    def nextBetaCount = lastBetaCount + 1
+
+    // Build the next beta version
+    return "${baseVersion}-${nextBetaCount}"
+}
