@@ -44,15 +44,29 @@ pipeline {
         stage('Create Auto Increment Tag') {
             steps {
                 script {
-                    // Your auto-incrementing logic goes here
-                    def lastBetaTag = sh(script: 'git describe --abbrev=0 --tags | grep "0.0.1-beta"', returnStdout: true).trim()
-                    def version = generateNextBetaVersion(lastBetaTag)
+                    // Checkout the 'develop' branch
+                    checkout scm
                     
-                    if (!tagExists(version)) {
-                        sh "git tag ${version}"
-                        sh "git push origin ${version}"
+                    // Your auto-incrementing logic goes here
+                    def tags = sh(script: 'git tag -l', returnStdout: true).trim()
+                    
+                    if (tags) {
+                        def lastBetaTag = sh(script: 'git describe --abbrev=0 --tags | grep "0.0.1-beta"', returnStdout: true).trim()
+                        
+                        if (lastBetaTag) {
+                            def version = generateNextBetaVersion(lastBetaTag)
+                            
+                            if (!tagExists(version)) {
+                                sh "git tag ${version}"
+                                sh "git push origin ${version}"
+                            } else {
+                                echo "Tag '${version}' already exists."
+                            }
+                        } else {
+                            echo "No beta tags found to auto-increment."
+                        }
                     } else {
-                        echo "Tag '${version}' already exists."
+                        echo "No tags found."
                     }
                 }
             }
