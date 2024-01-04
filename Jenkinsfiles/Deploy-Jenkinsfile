@@ -6,6 +6,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'github_key', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                     sh '''#!/bin/bash
+                        git checkout develop
                         # get the latest version tag
                         LATEST_TAG=$(git describe --tags --abbrev=0 || echo '0.0.1-beta-0')
                         
