@@ -49,8 +49,15 @@ pipeline {
         stage('Create Auto Increment Tag') {
             steps {
                 script {
-                    // Checkout the 'develop' branch
-                    checkout scm
+                    def gitCredentialsId = 'github_key'
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: 'develop']],
+                        userRemoteConfigs: [[
+                            url: 'https://github.com/amrashraf-web/Java_Project.git',
+                            credentialsId: gitCredentialsId
+                        ]]
+                    ])
                     
                     // Your auto-incrementing logic goes here
                     def lastBetaTag = sh(script: 'git describe --abbrev=0 --tags | grep "0.0.1-beta"', returnStdout: true).trim()
