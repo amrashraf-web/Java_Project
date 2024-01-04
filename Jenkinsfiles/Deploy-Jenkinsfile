@@ -7,19 +7,6 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                script {
-                    checkout([$class: 'GitSCM',
-                              branches: [[name: "refs/heads/${GIT_BRANCH}"]],
-                              doGenerateSubmoduleConfigurations: false,
-                              extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: '']],
-                              submoduleCfg: [],
-                              userRemoteConfigs: [[credentialsId: GITHUB_KEY_ID, url: 'https://github.com/amrashraf-web/Java_Project.git']]])
-                }
-            }
-        }
-
         stage('Versioning') {
             steps {
                 script {
