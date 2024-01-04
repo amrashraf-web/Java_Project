@@ -20,7 +20,7 @@ pipeline {
                         
                         # check if the beta number is an integer
                         if ! [[ $BETA =~ ^[0-9]+$ ]]; then
-                            BETA=1
+                            BETA=0
                         fi
                         
                         # auto increment the beta number
@@ -32,7 +32,7 @@ pipeline {
                         # check if the tag already exists
                         if ! git rev-parse "$NEW_TAG" >/dev/null 2>&1; then
                             # create the new tag
-                            git commit -m "Incrementing version number to $NEW_TAG"
+                            git tag -a $NEW_TAG -m "Incrementing version number to $NEW_TAG"
                             
                             # add the new tag to the remote repository
                             git push origin $NEW_TAG
