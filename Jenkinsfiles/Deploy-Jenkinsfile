@@ -17,7 +17,7 @@ pipeline {
             steps {
                 script {
                     def GITHUB_API_REPO_URL = "${DEFAULT_GITHUB_API_BASE_URL}${GITHUB_REPO}"
-                    def AUTH = withCredentials([usernamePassword(credentialsId: GITHUB_CREDENTIALS_ID, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    def AUTH = withCredentials([usernamePassword(credentialsId: GITHUB_CREDENTIALS_ID, usernameVariable: USERNAME, passwordVariable: PASSWORD)]) {
                         if (env.GITHUB_TOKEN) {
                             ['-H', "Authorization: token ${env.GITHUB_TOKEN}"]
                         } else {
