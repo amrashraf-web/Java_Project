@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Get Latest Version and Increment') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'your_credentials_id', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                withCredentials([usernamePassword(credentialsId: 'github_key', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                     sh '''
                         # get the latest version tag
                         LATEST_TAG=$(git describe --tags --abbrev=0 || echo '0.0.1-beta-1')
