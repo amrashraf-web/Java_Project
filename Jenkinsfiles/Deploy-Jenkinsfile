@@ -7,6 +7,7 @@ pipeline {
         DEFAULT_TAG_PREFIX = 'v'
         GITHUB_CREDENTIALS_ID = 'github_key'
         BRANCH_NAME = 'Develop'
+        JQ_PATH = '/usr/bin/jq'
     }
 
     stages {
@@ -19,13 +20,14 @@ pipeline {
                         def GITHUB_API_BASE_URL = env.GITHUB_API_BASE_URL ?: DEFAULT_GITHUB_API_BASE_URL
                         def TAG_PREFIX = env.TAG_PREFIX ?: DEFAULT_TAG_PREFIX
                         def NEW_PATCH_VERSION = '0.0.1-beta'
+                        def JQ_PATH = env.JQ_PATH ?: 'jq' // Use 'jq' if the path is not provided
 
                         // Derive API URL
                         def GITHUB_API_REPO_URL = "${GITHUB_API_BASE_URL}${env.JOB_NAME}"
 
                         // Get the last tag
                         def LAST_TAG = sh(script: """
-                            curl -sS --user ${GITHUB_TOKEN} ${GITHUB_API_REPO_URL}/tags | jq -r '.[].name' | grep -m 1 ${TAG_PREFIX}
+                            curl -sS --user ${GITHUB_TOKEN} ${GITHUB_API_REPO_URL}/tags | ${JQ_PATH} -r '.[].name' | grep -m 1 ${TAG_PREFIX}
                         """, returnStdout: true).trim()
 
                         echo "Last Tag: ${LAST_TAG}"
