@@ -32,7 +32,7 @@ pipeline {
                         # check if the tag already exists
                         if ! git rev-parse "$NEW_TAG" >/dev/null 2>&1; then
                             # create the new tag
-                            git tag $NEW_TAG
+                            git tag -a $NEW_TAG -m "Incrementing version number to $NEW_TAG"
                             
                             # push the new tag to GitHub
                             git push origin $NEW_TAG
