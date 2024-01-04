@@ -44,7 +44,7 @@ pipeline {
                     def LAST_COMMIT = env.DRONE_COMMIT_SHA ?: sh(script: "curl -sS ${AUTH.join(' ')} ${GITHUB_API_REPO_URL}/commits/${GITHUB_BRANCH} | jq -r '.sha'", returnStdout: true).trim()
                     echo "Last Commit: ${LAST_COMMIT}"
 
-                    def LAST_TAG = sh(script: "curl -sS ${AUTH.join(' ')} ${GITHUB_API_REPO_URL}/tags | jq -r '.[].name' | grep -m 1 ${TAG_PREFIX}", returnStdout: true).trim()
+                    def LAST_TAG = sh(script: "curl -sS ${AUTH.join(' ')} ${GITHUB_API_REPO_URL}/tags | jq -r '.[].name' | grep -E '^${TAG_PREFIX}[0-9.]+$' | sort -V | tail -n 1", returnStdout: true).trim()
                     echo "Last Tag: ${LAST_TAG}"
 
                     def NEW_PATCH_VERSION
