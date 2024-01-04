@@ -3,37 +3,40 @@ pipeline {
 
     stages {
         stage('Checkout') {
-            git branch: 'develop',
-                credentialsId: 'github_key',
-                url: 'https://github.com/amrashraf-web/Java_Project.git'
+            steps {
+                // check out from GitHub
+                git branch: 'develop',
+                    credentialsId: 'github_key',
+                    url: 'https://github.com/amrashraf-web/Java_Project.git'
+            }
         }
 
-        // Get latest version tag and auto increment the number
         stage('Get Latest Version and Increment') {
-            sh '''
-                # get the latest version tag
-                LATEST_TAG=$(git describe --tags --abbrev=0 || echo '0.0.1-beta-1')
-                
-                # split the version into three parts: major, minor, and patch
-                MAJOR=$(echo $LATEST_TAG | cut -d'.' -f1)
-                MINOR=$(echo $LATEST_TAG | cut -d'.' -f2)
-                PATCH=$(echo $LATEST_TAG | cut -d'.' -f3 | cut -d'-' -f1)
-                BETA=$(echo $LATEST_TAG | cut -d'.' -f3 | cut -d'-' -f2)
-                
-                # auto increment the version number
-                BETA=$((BETA + 1))
-                NEW_TAG="$MAJOR.$MINOR.$PATCH-beta-$BETA"
-                
-                echo "Creating new tag: $NEW_TAG"
-                
-                # create the new tag
-                git tag $NEW_TAG
-                
-                # push the new tag to GitHub
-                git push origin $NEW_TAG
-            '''
+            steps {
+                // Get latest version tag and auto increment the number
+                sh '''
+                    # get the latest version tag
+                    LATEST_TAG=$(git describe --tags --abbrev=0 || echo '0.0.1-beta-1')
+                    
+                    # split the version into three parts: major, minor, and patch
+                    MAJOR=$(echo $LATEST_TAG | cut -d'.' -f1)
+                    MINOR=$(echo $LATEST_TAG | cut -d'.' -f2)
+                    PATCH=$(echo $LATEST_TAG | cut -d'.' -f3 | cut -d'-' -f1)
+                    BETA=$(echo $LATEST_TAG | cut -d'.' -f3 | cut -d'-' -f2)
+                    
+                    # auto increment the version number
+                    BETA=$((BETA + 1))
+                    NEW_TAG="$MAJOR.$MINOR.$PATCH-beta-$BETA"
+                    
+                    echo "Creating new tag: $NEW_TAG"
+                    
+                    # create the new tag
+                    git tag $NEW_TAG
+                    
+                    # push the new tag to GitHub
+                    git push origin $NEW_TAG
+                '''
+            }
         }
     }
 }
-
-
