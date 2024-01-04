@@ -30,7 +30,12 @@ pipeline {
                     PATCH=$(echo $PATCH_AND_BETA | cut -d'-' -f1)
                     BETA=$(echo $PATCH_AND_BETA | cut -d'-' -f2)
                     
-                    # auto increment the version number
+                    # check if the beta number is an integer
+                    if ! [[ $BETA =~ ^[0-9]+$ ]]; then
+                        BETA=1
+                    fi
+                    
+                    # auto increment the beta number
                     BETA=$((BETA + 1))
                     NEW_TAG="$MAJOR.$MINOR.$PATCH-beta-$BETA"
                     
