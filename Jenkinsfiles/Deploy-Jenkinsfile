@@ -24,7 +24,15 @@ pipeline {
         stage('Create New Version Tag') {
             steps {
                 script {
-                    // Your versioning logic goes here
+                    def gitCredentialsId = 'github_key'
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: 'develop']],
+                        userRemoteConfigs: [[
+                            url: 'https://github.com/amrashraf-web/Java_Project.git',
+                            credentialsId: gitCredentialsId
+                        ]]
+                    ])
                     def version = generateNextBetaVersion('0.0.1-beta')
                     
                     if (!tagExists(version)) {
