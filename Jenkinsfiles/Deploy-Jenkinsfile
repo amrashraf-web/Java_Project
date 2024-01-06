@@ -5,6 +5,7 @@ pipeline {
         GITHUB_CREDENTIALS_ID = 'github_key'
         VERSION_PREFIX = '0.0.1-beta'
         TARGET_BRANCH = 'develop'
+        BRANCH_NAME = 'develop'
     }
     stages {
         stage('Print Branch Name') {
