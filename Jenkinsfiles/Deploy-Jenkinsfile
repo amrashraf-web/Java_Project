@@ -1,12 +1,21 @@
 pipeline {
     agent any
     environment {
-        GITHUB_REPO = 'amrashraf-web/Java_Project'
+        REPO_NAME  = 'amrashraf-web/Java_Project'
         GITHUB_CREDENTIALS_ID = 'github_key'
         VERSION_PREFIX = '0.0.1-beta'
-        TARGET_BRANCH = 'develop'
+        BRANCH_NAME  = 'develop'
     }
     stages {
+        stage('Checkout') {
+            steps {
+                // Check out the branch from the GitHub repository.
+                // Use the credential ID that you set up for your GitHub repository in Jenkins.
+                git "https://github.com/${env.REPO_NAME}.git",
+                    credentialsId: 'github_key',
+                    branch: "${env.BRANCH_NAME}"
+            }
+        }
         stage('Get Latest Version') {
             steps {
                 script {
