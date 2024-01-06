@@ -27,12 +27,12 @@ pipeline {
                     }
 
                     // Extract the numeric part of the latest version and increment it by 1.
-                    def newVersion = latestVersion.replaceAll(/(.*-beta-)(\d+)?$/) { _, prefix, num ->
-                        "${prefix}${num ? (num.toInteger() + 1) : 1}"
+                    def newVersion = latestVersion.replaceAll(/.*-beta-(\d+)$/){ _, num ->
+                        "${num.toInteger() + 1}"
                     }
 
                     // Print the new version.
-                    println "New Version: ${newVersion}"
+                    println "New Version: 0.0.1-beta-${newVersion}"
                 }
             }
         }
