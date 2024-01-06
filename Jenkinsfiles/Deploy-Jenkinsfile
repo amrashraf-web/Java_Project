@@ -23,21 +23,15 @@ pipeline {
                     // The 'sed' command extracts the numeric part from the string.
                     // The 'sort' command sorts the numeric parts in descending order.
                     // The 'head' command takes the first line from the sorted list.
-                    def latestVersion = sh(returnStdout: true, script: 'git tag --list \'v0.0.1-beta-*\' | sed \'s/^v//\' | sort -rV | head -n 1').trim()
+                    def latestVersion = sh(script: "git tag --list v0.0.1-beta-* | sed 's/^v//' | sort -rV | head -n 1", returnStdout: true).trim()
 
-                    // If there is no previous version, set the latest version to 0.0.1-beta-1.
-                    if (latestVersion == '') {
-                        latestVersion = '0.0.1-beta-1'
-                    }
+                    def versionComponents = latestVersion.split("-")
+                    def buildNumber = versionComponents[1].split("beta-")[1] as int
+                    buildNumber++
 
-                    // Extract the numeric part of the latest version.
-                    def numericVersion = (latestVersion =~ /-beta-(\d+)$/)[0][1] as int
+                    def newVersion = "v0.0.1-beta-${buildNumber}"
 
-                    // Increment the numeric part by 1 to get the new version.
-                    def newVersion = latestVersion - '-beta-' + numericVersion + 1
-
-                    // Print the new version.
-                    println "New Version: v${newVersion}"
+                    echo "New Version: ${newVersion}"
 
                     // You can use the new version in the subsequent stages of your pipeline.
                 }
