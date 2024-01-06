@@ -3,26 +3,19 @@ pipeline {
     environment {
         REPO_NAME  = 'amrashraf-web/Java_Project'
         GITHUB_CREDENTIALS_ID = 'github_key'
-        VERSION_PREFIX = '0.0.1-beta'
         BRANCH_NAME  = 'develop'
     }
     stages {
         stage('Checkout') {
             steps {
-                // Check out the branch from the GitHub repository.
-                // Use the credential ID that you set up for your GitHub repository in Jenkins.
                 git url: "https://github.com/${env.REPO_NAME}.git",
-                    credentialsId: 'your-credential-id',
+                    credentialsId: "${env.GITHUB_CREDENTIALS_ID}",
                     branch: "${env.BRANCH_NAME}"
             }
         }
         stage('Get Latest Version') {
             steps {
                 script {
-                    // The git tag command retrieves the latest version in the format of v0.0.1-beta-X.
-                    // The 'sed' command extracts the numeric part from the string.
-                    // The 'sort' command sorts the numeric parts in descending order.
-                    // The 'head' command takes the first line from the sorted list.
                     def latestVersion = sh(script: "git tag --list v0.0.1-beta-* | sed 's/^v//' | sort -rV | head -n 1", returnStdout: true).trim()
 
                     // If there is no previous version, set the latest version to 0.0.1-beta-1.
@@ -30,18 +23,14 @@ pipeline {
                         latestVersion = '0.0.1-beta-1'
                     }
 
-                    // Extract the numeric part of the latest version.
-                    def numericVersion = (latestVersion =~ /-beta-(\d+)$/)[0][1] as int
-
-                    // Increment the numeric part by 1 to get the new version.
-                    def newVersion = latestVersion - '-beta-' + numericVersion + 1
+                    // Extract the numeric part of the latest version and increment it by 1.
+                    def newVersion = latestVersion.replace(/(\d+)$/) { _, num -> "-beta-${num.toInteger() + 1}" }
 
                     // Print the new version.
                     println "New Version: ${newVersion}"
-
-                    // You can use the new version in the subsequent stages of your pipeline.
                 }
             }
         }
+
     }
 }
