@@ -7,48 +7,6 @@ pipeline {
         TARGET_BRANCH = 'develop'
     }
     stages {
-        # stage('Get Latest Version and Increment') {
-        #     steps {
-        #         withCredentials([usernamePassword(credentialsId: 'github_key', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-        #             sh '''#!/bin/bash
-        #                 # get the latest version tag
-        #                 LATEST_TAG=$(git describe --tags --abbrev=0 || echo '0.0.1-beta-0')
-                        
-        #                 # split the version into three parts: major, minor, and patch
-        #                 MAJOR=$(echo $LATEST_TAG | cut -d'.' -f1)
-        #                 MINOR=$(echo $LATEST_TAG | cut -d'.' -f2)
-        #                 PATCH_AND_BETA=$(echo $LATEST_TAG | cut -d'.' -f3)
-                        
-        #                 # split the patch and beta parts
-        #                 PATCH=$(echo $PATCH_AND_BETA | cut -d'-' -f1)
-        #                 BETA=$(echo $PATCH_AND_BETA | cut -d'-' -f2)
-                        
-        #                 # check if the beta number is an integer
-        #                 if ! [[ $BETA =~ ^[0-9]+$ ]]; then
-        #                     BETA=0
-        #                 fi
-                        
-        #                 # auto increment the beta number
-        #                 BETA=$((BETA + 1))
-        #                 NEW_TAG="$MAJOR.$MINOR.$PATCH-beta-$BETA"
-                        
-        #                 echo "Creating new tag: $NEW_TAG"
-                        
-        #                 # check if the tag already exists
-        #                 if ! git rev-parse "$NEW_TAG" >/dev/null 2>&1; then
-        #                     # create the new tag
-        #                     git tag -a $NEW_TAG -m "Incrementing version number to $NEW_TAG"
-                            
-        #                     # push the new tag to GitHub
-        #                     git push -f https://$GIT_USERNAME:$GIT_PASSWORD@github.com/amrashraf-web/Java_Project.git $NEW_TAG:develop
-        #                 else
-        #                     echo "Tag $NEW_TAG already exists"
-        #                     git push -f https://$GIT_USERNAME:$GIT_PASSWORD@github.com/amrashraf-web/Java_Project.git $NEW_TAG:develop
-        #                 fi
-        #             '''
-        #         }
-        #     }
-        # }
         stage('Get Latest Version') {
             when {
                 expression { env.BRANCH_NAME == TARGET_BRANCH }
