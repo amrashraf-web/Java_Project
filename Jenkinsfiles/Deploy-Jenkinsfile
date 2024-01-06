@@ -21,11 +21,14 @@ pipeline {
                     // If there are no tags matching the pattern, set the latest version to a default value.
                     if (latestVersion == null || latestVersion.isEmpty()) {
                         latestVersion = '0.0.1-beta-1'
+                        echo "No tags found. Setting latestVersion to default: ${latestVersion}"
+                    } else {
+                        echo "Latest Version: ${latestVersion}"
                     }
 
                     // Extract the numeric part of the latest version and increment it by 1.
                     def newVersion = latestVersion.replaceAll(/(.*-beta-)(\d+)$/) { _, prefix, num ->
-                        "${prefix}${(num.toInteger() + 1)}"
+                        "${prefix}${num ? (num.toInteger() + 1) : 1}"
                     }
 
                     // Print the new version.
