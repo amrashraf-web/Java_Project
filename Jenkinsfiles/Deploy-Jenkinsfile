@@ -43,28 +43,29 @@ pipeline {
         stage('Commit and Push Tag') {
             steps {
                 script {
-                    def newVersion = env.NEW_VERSION
+                    // Increment the numeric part of the latest version and create a new version.
+                    def newVersion = env.NEW_VERSION.replaceAll(/.*-(\d+)$/){ _, num ->
+                        num ? "${num.toInteger() + 1}" : "2"
+                    }
+
+                    // Print the new version.
+                    echo "New Version: 0.0.1-beta-${newVersion}"
+                    env.NEW_VERSION = "0.0.1-beta-${newVersion}"
 
                     // Check if the tag already exists
                     def tagExists = sh(script: "git tag -l '${newVersion}'", returnStatus: true) == 0
 
-                    if (tagExists) {
-                        echo "Tag '${newVersion}' already exists. Creating a new version."
-
-                        // Increment the numeric part of the latest version and create a new version.
-                        newVersion = newVersion.replaceAll(/.*-(\d+)$/){ _, num ->
-                            num ? "${num.toInteger() + 1}" : "2"
-                        }
-
-                        // Print the new version.
-                        echo "New Version: 0.0.1-beta-${newVersion}"
+                    // If the tag exists, continue incrementing until a unique version is found
+                    while (tagExists) {
+                        newVersion = newVersion.toInteger() + 1
                         env.NEW_VERSION = "0.0.1-beta-${newVersion}"
+                        tagExists = sh(script: "git tag -l '${env.NEW_VERSION}'", returnStatus: true) == 0
                     }
 
                     // Commit the new tag and push it to the repository using GitHub credentials
                     withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: "${env.GITHUB_CREDENTIALS_ID}", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD']]) {
-                        sh "git tag -a ${newVersion} -m 'Release ${newVersion}'"
-                        sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${env.REPO_NAME}.git ${newVersion}"
+                        sh "git tag -a ${env.NEW_VERSION} -m 'Release ${env.NEW_VERSION}'"
+                        sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${env.REPO_NAME}.git ${env.NEW_VERSION}"
                     }
                 }
             }
