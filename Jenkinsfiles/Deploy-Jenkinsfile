@@ -27,16 +27,19 @@ pipeline {
                         echo "Latest Version: ${latestVersion}"
                     }
 
-                    // Extract the numeric part of the latest version and increment it by 1.
-                    def newVersion = latestVersion.replaceAll(/.*-beta-(\d+)$/){ _, num ->
-                        num ? "${num.toInteger() + 1}" : "1"
-                    }
+                    // Check if latestVersion is not null before using replaceAll
+                    if (latestVersion != null) {
+                        // Extract the numeric part of the latest version and increment it by 1.
+                        def newVersion = latestVersion.replaceAll(/.*-beta-(\d+)$/){ _, num ->
+                            num ? "${num.toInteger() + 1}" : "1"
+                        }
 
-                    // Print the new version.
-                    echo "New Version: 0.0.1-beta-${newVersion}"
-                    
-                    // Set the new tag version for later use.
-                    env.NEW_VERSION = "0.0.1-beta-${newVersion}"
+                        // Print the new version.
+                        echo "New Version: 0.0.1-beta-${newVersion}"
+
+                        // Set the new tag version for later use.
+                        env.NEW_VERSION = "0.0.1-beta-${newVersion}"
+                    }
                 }
             }
         }
@@ -52,14 +55,17 @@ pipeline {
                     if (tagExists) {
                         echo "Tag '${newVersion}' already exists. Creating a new version."
                         
-                        // Increment the numeric part of the latest version and create a new version.
-                        newVersion = latestVersion.replaceAll(/.*-beta-(\d+)$/){ _, num ->
-                            num ? "${num.toInteger() + 1}" : "1"
+                        // Check if latestVersion is not null before using replaceAll
+                        if (latestVersion != null) {
+                            // Increment the numeric part of the latest version and create a new version.
+                            newVersion = latestVersion.replaceAll(/.*-beta-(\d+)$/){ _, num ->
+                                num ? "${num.toInteger() + 1}" : "1"
+                            }
+
+                            // Print the new version.
+                            echo "New Version: 0.0.1-beta-${newVersion}"
+                            env.NEW_VERSION = "0.0.1-beta-${newVersion}"
                         }
-                        
-                        // Print the new version.
-                        echo "New Version: 0.0.1-beta-${newVersion}"
-                        env.NEW_VERSION = "0.0.1-beta-${newVersion}"
                     }
 
                     // Commit the new tag and push it to the repository.
