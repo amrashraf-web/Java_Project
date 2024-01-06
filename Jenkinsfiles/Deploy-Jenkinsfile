@@ -62,7 +62,7 @@ pipeline {
 
                     // Commit the new tag and push it to the repository.
                     sh "git tag -a ${newVersion} -m 'Release ${newVersion}'"
-                    sh "git push origin ${newVersion}"
+                    sh "git push -f https://$GIT_USERNAME:$GIT_PASSWORD@github.com/amrashraf-web/Java_Project.git $newVersion:develop"
                 }
             }
         }
