@@ -11,8 +11,8 @@ pipeline {
             steps {
                 // Check out the branch from the GitHub repository.
                 // Use the credential ID that you set up for your GitHub repository in Jenkins.
-                git "https://github.com/${env.REPO_NAME}.git",
-                    credentialsId: 'github_key',
+                git url: "https://github.com/${env.REPO_NAME}.git",
+                    credentialsId: 'your-credential-id',
                     branch: "${env.BRANCH_NAME}"
             }
         }
