@@ -55,11 +55,10 @@ pipeline {
                     // Check if the tag already exists
                     def tagExists = sh(script: "git tag -l '${env.NEW_VERSION}'", returnStatus: true) == 0
 
-                    // If the tag exists, continue incrementing until a unique version is found
-                    while (tagExists) {
+                    // If the tag exists, use a different version.
+                    if (tagExists) {
                         newVersion = newVersion.toInteger() + 1
                         env.NEW_VERSION = "0.0.1-beta-${newVersion}"
-                        tagExists = sh(script: "git tag -l '${env.NEW_VERSION}'", returnStatus: true) == 0
                     }
 
                     // Commit the new tag and push it to the repository using GitHub credentials
@@ -70,6 +69,7 @@ pipeline {
                 }
             }
         }
+
 
 
     }
