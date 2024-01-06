@@ -32,7 +32,21 @@ pipeline {
                     }
 
                     // Print the new version.
-                    println "New Version: 0.0.1-beta-${newVersion}"
+                    echo "New Version: 0.0.1-beta-${newVersion}"
+                    
+                    // Set the new tag version for later use.
+                    env.NEW_VERSION = "0.0.1-beta-${newVersion}"
+                }
+            }
+        }
+        stage('Commit and Push Tag') {
+            steps {
+                script {
+                    def newVersion = env.NEW_VERSION
+                    
+                    // Commit the new tag and push it to the repository.
+                    sh "git tag -a ${newVersion} -m 'Release ${newVersion}'"
+                    sh "git push origin ${newVersion}"
                 }
             }
         }
