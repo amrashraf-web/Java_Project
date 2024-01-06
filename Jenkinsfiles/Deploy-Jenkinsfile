@@ -7,6 +7,11 @@ pipeline {
         TARGET_BRANCH = 'develop'
     }
     stages {
+        stage('Print Branch Name') {
+            steps {
+                echo "Current branch: ${env.BRANCH_NAME}"
+            }
+        }
         stage('Get Latest Version') {
             when {
                 expression { env.BRANCH_NAME == TARGET_BRANCH }
