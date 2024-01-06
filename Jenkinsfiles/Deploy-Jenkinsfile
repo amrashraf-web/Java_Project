@@ -16,8 +16,7 @@ pipeline {
         stage('Get Latest Version') {
             steps {
                 script {
-                    // Define the variable outside of the script block
-                    latestVersion = sh(script: 'git tag --list 0.0.1-beta-* --sort=-v:refname | head -n 1', returnStdout: true).trim()
+                    def latestVersion = sh(script: 'git tag --list 0.0.1-beta-* --sort=-v:refname | head -n 1', returnStdout: true).trim()
 
                     // If there are no tags matching the pattern, set the latest version to a default value.
                     if (latestVersion == null || latestVersion.isEmpty()) {
@@ -46,10 +45,11 @@ pipeline {
                     def newVersion = env.NEW_VERSION
                     
                     // Check if the tag already exists
-                    def tagExists = sh(script: "git rev-parse --verify --quiet refs/tags/${newVersion}", returnStatus: true) == 0
+                    def tagExists = sh(script: "git tag -l '${newVersion}'", returnStatus: true) == 0
                     
                     if (tagExists) {
                         echo "Tag '${newVersion}' already exists. Creating a new version."
+                        
                         // Increment the numeric part of the latest version and create a new version.
                         newVersion = latestVersion.replaceAll(/.*-beta-(\d+)$/){ _, num ->
                             num ? "${num.toInteger() + 1}" : "1"
