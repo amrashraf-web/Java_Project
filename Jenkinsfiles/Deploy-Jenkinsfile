@@ -53,7 +53,7 @@ pipeline {
                     env.NEW_VERSION = "0.0.1-beta-${newVersion}"
 
                     // Check if the tag already exists
-                    def tagExists = sh(script: "git tag -l '${newVersion}'", returnStatus: true) == 0
+                    def tagExists = sh(script: "git tag -l '${env.NEW_VERSION}'", returnStatus: true) == 0
 
                     // If the tag exists, continue incrementing until a unique version is found
                     while (tagExists) {
@@ -70,6 +70,7 @@ pipeline {
                 }
             }
         }
+
 
     }
 }
