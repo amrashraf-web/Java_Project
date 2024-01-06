@@ -53,7 +53,7 @@ pipeline {
                         
                         // Increment the numeric part of the latest version and create a new version.
                         newVersion = newVersion.replaceAll(/.*-(\d+)$/){ _, num ->
-                            num ? "${num.toInteger() + 1}" : "1"
+                            num ? "${num.toInteger() + 1}" : "2"
                         }
                         
                         // Print the new version.
