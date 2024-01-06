@@ -16,7 +16,7 @@ pipeline {
         stage('Get Latest Version') {
             steps {
                 script {
-                    def latestVersion = sh(script: "git tag --list v0.0.1-beta-* | sed 's/^v//' | sort -rV | head -n 1", returnStdout: true).trim()
+                    def latestVersion = sh(script: "git tag --list 0.0.1-beta-* | sed 's/^v//' | sort -rV | head -n 1", returnStdout: true).trim()
 
                     // If there is no previous version, set the latest version to 0.0.1-beta-1.
                     if (latestVersion == '') {
